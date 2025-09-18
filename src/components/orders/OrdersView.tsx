@@ -22,6 +22,8 @@ interface Order {
   storeName: string
   orderType: 'REPLENISHMENT' | 'AD_HOC'
   status: string
+  lineItems: any[]
+  auditTrail: any[]
   lineItemCount: number
   totalCost?: number
   createdAt: string
@@ -35,6 +37,8 @@ const sampleOrders: Order[] = [
     storeName: 'Downtown LA',
     orderType: 'AD_HOC',
     status: 'PENDING_DM_APPROVAL',
+    lineItems: [],
+    auditTrail: [],
     lineItemCount: 3,
     totalCost: 125.50,
     createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
@@ -46,6 +50,8 @@ const sampleOrders: Order[] = [
     storeName: 'Downtown LA',
     orderType: 'REPLENISHMENT',
     status: 'IN_TRANSIT',
+    lineItems: [],
+    auditTrail: [],
     lineItemCount: 8,
     totalCost: 450.00,
     createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
@@ -57,6 +63,8 @@ const sampleOrders: Order[] = [
     storeName: 'Beverly Hills',
     orderType: 'AD_HOC',
     status: 'RECEIVED_COMPLETE',
+    lineItems: [],
+    auditTrail: [],
     lineItemCount: 2,
     totalCost: 75.99,
     createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
@@ -68,6 +76,8 @@ const sampleOrders: Order[] = [
     storeName: 'Santa Monica',
     orderType: 'AD_HOC',
     status: 'PENDING_FM_APPROVAL',
+    lineItems: [],
+    auditTrail: [],
     lineItemCount: 1,
     totalCost: 899.99,
     createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
@@ -79,6 +89,8 @@ const sampleOrders: Order[] = [
     storeName: 'West Hollywood',
     orderType: 'AD_HOC',
     status: 'PENDING_DM_APPROVAL',
+    lineItems: [],
+    auditTrail: [],
     lineItemCount: 5,
     totalCost: 234.50,
     createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
@@ -94,6 +106,85 @@ export function OrdersView({ userRole, userId }: OrdersViewProps) {
   const [showRejectDialog, setShowRejectDialog] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const { addNotification } = useNotifications()
+
+  // Substitution dialog state
+  const [showSubDialog, setShowSubDialog] = useState(false)
+  const [subOrder, setSubOrder] = useState<Order | null>(null)
+  const [subLineItem, setSubLineItem] = useState<any>(null)
+  const [subProductId, setSubProductId] = useState('')
+  const [subReason, setSubReason] = useState('')
+  const [subLoading, setSubLoading] = useState(false)
+
+  // Get products from catalog
+  const [productsRaw] = useKV<any[]>('products', [])
+  // Always fallback to array
+  const products = Array.isArray(productsRaw) ? productsRaw : (productsRaw ? [productsRaw] : [])
+
+  const openSubDialog = (order: Order, lineItem: any) => {
+    setSubOrder(order)
+    setSubLineItem(lineItem)
+    setShowSubDialog(true)
+    setSubProductId('')
+    setSubReason('')
+  }
+
+  const handleSubstitute = async () => {
+    if (!subOrder || !subLineItem || !subProductId || !subReason) return
+    setSubLoading(true)
+    try {
+      const product = products.find(p => p.productId === subProductId)
+      if (!product) throw new Error('Product not found')
+      setOrders(currentOrders =>
+        currentOrders?.map(order => {
+          if (order.orderId !== subOrder.orderId) return order
+          return {
+            ...order,
+            lineItems: order.lineItems.map(li =>
+              li.lineItemId === subLineItem.lineItemId
+                ? {
+                  ...li,
+                  isSubstituted: true,
+                  substitutedProductId: product.productId,
+                  substitutedProductName: product.productName,
+                  substitutedCostPerUnit: product.costPerUnit,
+                  substitutionReason: subReason
+                }
+                : li
+            ),
+            auditTrail: [
+              ...order.auditTrail,
+              {
+                timestamp: new Date().toISOString(),
+                actor: userId,
+                action: 'SUBSTITUTED_LINE_ITEM',
+                details: `Substituted ${subLineItem.productName} with ${product.productName} (Reason: ${subReason})`,
+                reasonCode: 'COST_OPTIMIZATION'
+              }
+            ]
+          }
+        }) || []
+      )
+      // Notification
+      addNotification({
+        id: `${subOrder.orderId}-sub-${Date.now()}`,
+        message: `Line item substituted in Order #${subOrder.orderId} by ${userRole}.`,
+        timestamp: new Date().toISOString(),
+        isRead: false,
+        orderId: subOrder.orderId
+      })
+      // Toast
+      toast.success('Line item substituted', {
+        description: `Substituted ${subLineItem.productName} with ${product.productName}. Savings: $${((subLineItem.costPerUnit - product.costPerUnit) * subLineItem.quantityOrdered).toFixed(2)}`
+      })
+      setShowSubDialog(false)
+      setSubOrder(null)
+      setSubLineItem(null)
+    } catch (e: any) {
+      toast.error('Substitution failed', { description: e.message })
+    } finally {
+      setSubLoading(false)
+    }
+  }
 
   const getFilteredOrders = (filter: string) => {
     if (!orders) return []
@@ -368,6 +459,18 @@ export function OrdersView({ userRole, userId }: OrdersViewProps) {
                               >
                                 Approve
                               </Button>
+                              {/* Substitution button for DM/FM */}
+                              {order.lineItems?.map(li => (
+                                <Button
+                                  key={li.lineItemId}
+                                  variant="secondary"
+                                  size="sm"
+                                  disabled={li.isSubstituted}
+                                  onClick={() => openSubDialog(order, li)}
+                                >
+                                  {li.isSubstituted ? 'Substituted' : 'Substitute'}
+                                </Button>
+                              ))}
                             </>
                           )}
                         </div>
@@ -406,6 +509,61 @@ export function OrdersView({ userRole, userId }: OrdersViewProps) {
       )}
 
       {/* Rejection Dialog */}
+      {/* Substitution Dialog */}
+      {showSubDialog && subOrder && subLineItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-2">Substitute Line Item</h2>
+            <p className="mb-2 text-sm text-muted-foreground">Order #{subOrder.orderId.slice(-6)} • {subLineItem.productName}</p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Select Substitute Product</label>
+              <select
+                className="w-full border rounded px-2 py-1"
+                value={subProductId}
+                onChange={e => setSubProductId(e.target.value)}
+              >
+                <option value="">Choose product...</option>
+                {products.filter(p => p.productId !== subLineItem.productId).map(p => (
+                  <option key={p.productId} value={p.productId}>
+                    {p.productName} (${p.costPerUnit})
+                  </option>
+                ))}
+              </select>
+              {/* Error display for missing product */}
+              {!subProductId && (
+                <div className="text-xs text-red-500 mt-1">Please select a substitute product.</div>
+              )}
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Reason for Substitution</label>
+              <input
+                className="w-full border rounded px-2 py-1"
+                value={subReason}
+                onChange={e => setSubReason(e.target.value)}
+                placeholder="E.g. cost savings, supply issue..."
+              />
+              {/* Error display for missing reason */}
+              {!subReason && (
+                <div className="text-xs text-red-500 mt-1">Please provide a reason for substitution.</div>
+              )}
+            </div>
+            {subProductId && (
+              <div className="mb-4 text-sm">
+                Savings: $
+                {(() => {
+                  const prod = products.find(p => p.productId === subProductId)
+                  if (!prod) return '0.00'
+                  return ((subLineItem.costPerUnit - prod.costPerUnit) * subLineItem.quantityOrdered).toFixed(2)
+                })()}
+              </div>
+            )}
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowSubDialog(false)} disabled={subLoading}>Cancel</Button>
+              <Button onClick={handleSubstitute} disabled={subLoading || !subProductId || !subReason}>Confirm Substitute</Button>
+            </div>
+          </div>
+        </div>
+      )}
       {selectedOrder && (
         <RejectDialog
           open={showRejectDialog}
