@@ -5,9 +5,10 @@ import { Dashboard } from './components/Dashboard'
 import { Header } from './components/layout/Header'
 import { Sidebar } from './components/layout/Sidebar'
 import { Catalog } from './components/catalog/Catalog'
-import { OrdersView } from './components/orders/OrdersView'
-import { AuditDashboard } from './components/audit/AuditDashboard'
-import { UserRole, getCurrentUser } from './lib/auth'
+import { OrdersView } from '@/components/orders/OrdersView'
+import { AuditDashboard } from '@/components/audit/AuditDashboard'
+import { getCurrentUser } from '@/lib/auth'
+import type { UserRole } from '@/lib/auth'
 
 export type NavigationView = 'dashboard' | 'catalog' | 'orders' | 'audit'
 

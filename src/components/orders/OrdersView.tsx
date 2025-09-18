@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { UserRole, hasPermission } from '@/lib/auth'
+import type { UserRole } from '@/lib/auth'
+import { hasPermission } from '@/lib/auth'
 import { ShoppingCart, Clock, CheckCircle, Package, Eye } from '@phosphor-icons/react'
 
 interface OrdersViewProps {
