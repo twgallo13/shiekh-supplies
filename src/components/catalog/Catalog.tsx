@@ -167,69 +167,85 @@ export function Catalog({ userRole }: CatalogProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProducts.map((product) => (
-          <Card key={product.productId} className="flex flex-col">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle className="text-lg">{product.productName}</CardTitle>
-                  <CardDescription className="line-clamp-2">
-                    {product.description}
-                  </CardDescription>
-                </div>
-                {product.isRestricted && (
-                  <Badge variant="destructive" className="ml-2">
-                    <Warning size={12} className="mr-1" />
-                    Restricted
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
-
-            <CardContent className="flex-1 flex flex-col justify-between">
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">SKU:</span>
-                  <span className="font-mono">{product.sku}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Unit:</span>
-                  <span>{product.unitOfMeasure}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Category:</span>
-                  <span>{product.category}</span>
-                </div>
-                {canViewCosts && product.costPerUnit && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Cost:</span>
-                    <span className="font-semibold">{formatCurrency(product.costPerUnit)}</span>
+          <div
+            key={product.productId}
+            className="cursor-pointer"
+            onClick={e => {
+              // Prevent navigation if a button is clicked
+              if ((e.target as HTMLElement).closest('button')) return
+              window.location.hash = `#/product/${product.productId}`
+            }}
+          >
+            <Card className="flex flex-col">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <CardTitle className="text-lg">{product.productName}</CardTitle>
+                    <CardDescription className="line-clamp-2">
+                      {product.description}
+                    </CardDescription>
                   </div>
-                )}
-              </div>
-
-              {hasPermission(userRole, 'canCreateOrders') && (
-                <div>
-                  {product.isRestricted ? (
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => requestApproval(product.productId)}
-                    >
-                      Request Approval
-                    </Button>
-                  ) : (
-                    <Button
-                      className="w-full"
-                      onClick={() => addToCart(product.productId)}
-                    >
-                      <ShoppingCart size={16} className="mr-2" />
-                      Add to Cart
-                    </Button>
+                  {product.isRestricted && (
+                    <Badge variant="destructive" className="ml-2">
+                      <Warning size={12} className="mr-1" />
+                      Restricted
+                    </Badge>
                   )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardHeader>
+
+              <CardContent className="flex-1 flex flex-col justify-between">
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">SKU:</span>
+                    <span className="font-mono">{product.sku}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Unit:</span>
+                    <span>{product.unitOfMeasure}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Category:</span>
+                    <span>{product.category}</span>
+                  </div>
+                  {canViewCosts && product.costPerUnit && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Cost:</span>
+                      <span className="font-semibold">{formatCurrency(product.costPerUnit)}</span>
+                    </div>
+                  )}
+                </div>
+
+                {hasPermission(userRole, 'canCreateOrders') && (
+                  <div>
+                    {product.isRestricted ? (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={e => {
+                          e.stopPropagation()
+                          requestApproval(product.productId)
+                        }}
+                      >
+                        Request Approval
+                      </Button>
+                    ) : (
+                      <Button
+                        className="w-full"
+                        onClick={e => {
+                          e.stopPropagation()
+                          addToCart(product.productId)
+                        }}
+                      >
+                        <ShoppingCart size={16} className="mr-2" />
+                        Add to Cart
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         ))}
       </div>
 
