@@ -27,42 +27,66 @@ export const rolePermissions = {
     canApproveOrders: false,
     canViewAllStores: false,
     canAccessAudit: false,
-    canViewCosts: false
+    canViewCosts: false,
+    canAccessAnalytics: false,
+    canManageUsers: false,
+    canViewInventory: true,
+    canAccessReports: false
   },
   DM: {
     canCreateOrders: true,
     canApproveOrders: true,
-    canViewAllStores: false,
+    canViewAllStores: false, // Only district stores
     canAccessAudit: false,
-    canViewCosts: false
+    canViewCosts: false,
+    canAccessAnalytics: true,
+    canManageUsers: false,
+    canViewInventory: true,
+    canAccessReports: true
   },
   FM: {
     canCreateOrders: true,
     canApproveOrders: true,
     canViewAllStores: true,
     canAccessAudit: false,
-    canViewCosts: true
+    canViewCosts: true,
+    canAccessAnalytics: true,
+    canManageUsers: false,
+    canViewInventory: true,
+    canAccessReports: true
   },
   ADMIN: {
     canCreateOrders: false,
     canApproveOrders: false,
     canViewAllStores: true,
     canAccessAudit: true,
-    canViewCosts: true
+    canViewCosts: true,
+    canAccessAnalytics: true,
+    canManageUsers: true,
+    canViewInventory: true,
+    canAccessReports: true
   },
   COST_ANALYST: {
     canCreateOrders: false,
     canApproveOrders: false,
     canViewAllStores: true,
     canAccessAudit: true,
-    canViewCosts: true
+    canViewCosts: true,
+    canAccessAnalytics: true,
+    canManageUsers: false,
+    canViewInventory: true,
+    canAccessReports: true
   },
   AI_AGENT: {
     canCreateOrders: true,
     canApproveOrders: false,
     canViewAllStores: true,
     canAccessAudit: false,
-    canViewCosts: true
+    canViewCosts: true,
+    canAccessAnalytics: false,
+    canManageUsers: false,
+    canViewInventory: true,
+    canAccessReports: false
   }
 }
 
@@ -116,4 +140,25 @@ export async function getCurrentUser(): Promise<User> {
 
 export function hasPermission(role: UserRole, permission: keyof typeof rolePermissions.SM): boolean {
   return rolePermissions[role][permission]
+}
+
+/**
+ * Check if user has access to a specific navigation view
+ */
+export function canAccessView(role: UserRole, view: string): boolean {
+  const viewPermissions = {
+    'dashboard': null, // Everyone can access dashboard
+    'catalog': 'canCreateOrders',
+    'orders': null, // Everyone can view their orders
+    'inventory': 'canViewInventory',
+    'analytics': 'canAccessAnalytics',
+    'reports': 'canAccessReports',
+    'audit': 'canAccessAudit',
+    'users': 'canManageUsers'
+  } as const
+
+  const requiredPermission = viewPermissions[view as keyof typeof viewPermissions]
+  if (!requiredPermission) return true
+  
+  return hasPermission(role, requiredPermission as keyof typeof rolePermissions.SM)
 }
