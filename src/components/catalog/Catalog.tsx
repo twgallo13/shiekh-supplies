@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { UserRole, hasPermission } from '@/lib/auth'
+import { useCartStore } from '@/stores/cart-store'
 import { MagnifyingGlass, Package, ShoppingCart, Warning } from '@phosphor-icons/react'
 
 interface CatalogProps {
@@ -70,37 +71,37 @@ export function Catalog({ userRole }: CatalogProps) {
   const [products, setProducts] = useKV<Product[]>('products', sampleProducts)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [cart, setCart] = useKV<{ productId: string; quantity: number }[]>('cart', [])
+  const { addItem, items: cartItems, getTotalItems, setIsOpen } = useCartStore()
 
   const categories = ['all', ...new Set(products?.map(p => p.category) || [])]
-  
+
   const filteredProducts = (products || []).filter(product => {
     const matchesSearch = product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.sku.toLowerCase().includes(searchTerm.toLowerCase())
-    
+      product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.sku.toLowerCase().includes(searchTerm.toLowerCase())
+
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory
-    
+
     return matchesSearch && matchesCategory
   })
 
   const addToCart = (productId: string) => {
-    setCart(currentCart => {
-      const cart = currentCart || []
-      const existingItem = cart.find(item => item.productId === productId)
-      if (existingItem) {
-        return cart.map(item =>
-          item.productId === productId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      }
-      return [...cart, { productId, quantity: 1 }]
-    })
+    const product = products?.find(p => p.productId === productId)
+    if (product) {
+      addItem({
+        productId: product.productId,
+        sku: product.sku,
+        productName: product.productName,
+        unitOfMeasure: product.unitOfMeasure,
+        isRestricted: product.isRestricted,
+        costPerUnit: product.costPerUnit
+      })
+    }
   }
 
   const requestApproval = (productId: string) => {
-    console.log('Requesting approval for product:', productId)
+    // For restricted items, add to cart and it will be handled in the order submission
+    addToCart(productId)
   }
 
   const formatCurrency = (amount: number) => {
@@ -129,7 +130,7 @@ export function Catalog({ userRole }: CatalogProps) {
             className="pl-10"
           />
         </div>
-        
+
         <div className="flex gap-2 flex-wrap">
           {categories.map(category => (
             <Button
@@ -145,20 +146,20 @@ export function Catalog({ userRole }: CatalogProps) {
         </div>
       </div>
 
-      {cart && cart.length > 0 && (
+      {cartItems.length > 0 && (
         <Card className="border-accent">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ShoppingCart size={20} />
-              Cart ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)
+              Cart ({getTotalItems()} items)
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">
-                {cart.length} product types selected
+                {cartItems.length} product types selected
               </span>
-              <Button>Create Order</Button>
+              <Button onClick={() => setIsOpen(true)}>Review Cart</Button>
             </div>
           </CardContent>
         </Card>
@@ -183,7 +184,7 @@ export function Catalog({ userRole }: CatalogProps) {
                 )}
               </div>
             </CardHeader>
-            
+
             <CardContent className="flex-1 flex flex-col justify-between">
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-sm">
@@ -209,15 +210,15 @@ export function Catalog({ userRole }: CatalogProps) {
               {hasPermission(userRole, 'canCreateOrders') && (
                 <div>
                   {product.isRestricted ? (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full"
                       onClick={() => requestApproval(product.productId)}
                     >
                       Request Approval
                     </Button>
                   ) : (
-                    <Button 
+                    <Button
                       className="w-full"
                       onClick={() => addToCart(product.productId)}
                     >

@@ -2,7 +2,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { User, roleLabels, UserRole } from '@/lib/auth'
-import { SignOut, Bell, UserSwitch } from '@phosphor-icons/react'
+import { useCartStore } from '@/stores/cart-store'
+import { SignOut, Bell, UserSwitch, ShoppingCart } from '@phosphor-icons/react'
 
 interface HeaderProps {
   user: User
@@ -11,6 +12,8 @@ interface HeaderProps {
 }
 
 export function Header({ user, onLogout, onRoleSwitch }: HeaderProps) {
+  const { getTotalItems, setIsOpen } = useCartStore()
+
   const handleRoleChange = (role: string) => {
     if (onRoleSwitch) {
       onRoleSwitch(role as UserRole)
@@ -27,6 +30,23 @@ export function Header({ user, onLogout, onRoleSwitch }: HeaderProps) {
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm">
             <Bell size={18} />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="relative"
+            onClick={() => setIsOpen(true)}
+          >
+            <ShoppingCart size={18} />
+            {getTotalItems() > 0 && (
+              <Badge
+                variant="destructive"
+                className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
+              >
+                {getTotalItems()}
+              </Badge>
+            )}
           </Button>
 
           {/* Role Switcher for testing */}
@@ -47,7 +67,7 @@ export function Header({ user, onLogout, onRoleSwitch }: HeaderProps) {
               </Select>
             </div>
           )}
-          
+
           <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted">
             <div className="text-sm">
               <div className="font-medium">{user.fullName}</div>

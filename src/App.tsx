@@ -5,10 +5,12 @@ import { Dashboard } from './components/Dashboard'
 import { Header } from './components/layout/Header'
 import { Sidebar } from './components/layout/Sidebar'
 import { Catalog } from './components/catalog/Catalog'
+import { CartSheet } from './components/cart/CartSheet'
 import { OrdersView } from '@/components/orders/OrdersView'
 import { AuditDashboard } from '@/components/audit/AuditDashboard'
 import { PermissionsSummary } from '@/components/admin/PermissionsSummary'
 import { ComponentsDemo } from '@/components/ui/components-demo'
+import { Toaster } from '@/components/ui/sonner'
 import { getCurrentUser, canAccessView, UserRole } from '@/lib/auth'
 import { toast } from 'sonner'
 
@@ -33,7 +35,7 @@ function App() {
         setIsLoading(false)
       }
     }
-    
+
     initializeUser()
   }, [currentUser, setCurrentUser])
 
@@ -56,7 +58,7 @@ function App() {
         assignment: { type: 'store' as const, id: 'store-001', name: 'Downtown LA' }
       },
       'DM': {
-        userId: 'demo-dm-1', 
+        userId: 'demo-dm-1',
         fullName: 'Marcus Johnson',
         email: 'marcus.johnson@supplysync.com',
         role: 'DM' as UserRole,
@@ -65,7 +67,7 @@ function App() {
       'FM': {
         userId: 'demo-fm-1',
         fullName: 'Elena Rodriguez',
-        email: 'elena.rodriguez@supplysync.com', 
+        email: 'elena.rodriguez@supplysync.com',
         role: 'FM' as UserRole,
         assignment: { type: 'region' as const, id: 'region-west', name: 'Western Region' }
       },
@@ -94,10 +96,10 @@ function App() {
 
     const newUser = demoUsers[newRole]
     setCurrentUser(newUser)
-    
+
     // Reset view to dashboard when switching roles
     setCurrentView('dashboard')
-    
+
     toast.success('Role switched', {
       description: `Now viewing as ${newUser.fullName} (${newRole})`
     })
@@ -171,14 +173,14 @@ function App() {
   return (
     <div className="min-h-screen bg-background font-sans antialiased">
       <div className="flex">
-        <Sidebar 
+        <Sidebar
           userRole={currentUser.role}
           currentView={currentView}
           onViewChange={handleViewChange}
         />
         <div className="flex-1 min-h-screen">
-          <Header 
-            user={currentUser} 
+          <Header
+            user={currentUser}
             onLogout={handleLogout}
             onRoleSwitch={handleRoleSwitch}
           />
@@ -187,6 +189,12 @@ function App() {
           </main>
         </div>
       </div>
+
+      {/* Global Cart Sheet */}
+      <CartSheet user={currentUser} />
+
+      {/* Toast notifications */}
+      <Toaster />
     </div>
   )
 }
