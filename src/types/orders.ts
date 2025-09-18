@@ -71,3 +71,11 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
     'REJECTED': 'Rejected',
     'CANCELLED': 'Cancelled'
 }
+
+export interface Notification {
+    id: string;
+    message: string;
+    timestamp: string;
+    isRead: boolean;
+    orderId?: string;
+}

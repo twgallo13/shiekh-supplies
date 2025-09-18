@@ -4,6 +4,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { User, roleLabels, UserRole } from '@/lib/auth'
 import { useCartStore } from '@/stores/cart-store'
 import { SignOut, Bell, UserSwitch, ShoppingCart } from '@phosphor-icons/react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { useNotifications } from '@/store/notifications-store'
+import { formatDistanceToNow } from 'date-fns'
 
 interface HeaderProps {
   user: User
@@ -13,6 +16,11 @@ interface HeaderProps {
 
 export function Header({ user, onLogout, onRoleSwitch }: HeaderProps) {
   const { getTotalItems, setIsOpen } = useCartStore()
+  const {
+    notifications,
+    unreadCount,
+    markAllAsRead,
+  } = useNotifications()
 
   const handleRoleChange = (role: string) => {
     if (onRoleSwitch) {
@@ -28,9 +36,46 @@ export function Header({ user, onLogout, onRoleSwitch }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm">
-            <Bell size={18} />
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="relative">
+                <Bell size={18} />
+                {unreadCount > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -top-2 -right-2 h-4 w-4 rounded-full p-0 text-xs flex items-center justify-center"
+                  >
+                    {unreadCount}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0">
+              <div className="border-b px-4 py-3 flex items-center justify-between">
+                <span className="font-semibold">Notifications</span>
+                <Button variant="outline" size="sm" onClick={markAllAsRead}>
+                  Mark all as read
+                </Button>
+              </div>
+              <div className="max-h-80 overflow-y-auto">
+                {notifications.length === 0 ? (
+                  <div className="p-4 text-muted-foreground text-center">No notifications</div>
+                ) : (
+                  notifications.map((n) => (
+                    <div
+                      key={n.id}
+                      className={`px-4 py-3 border-b last:border-b-0 flex flex-col gap-1 ${!n.isRead ? 'bg-blue-50' : ''}`}
+                    >
+                      <div className="text-sm">{n.message}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(n.timestamp), { addSuffix: true })}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
 
           <Button
             variant="ghost"

@@ -9,6 +9,7 @@ import type { UserRole } from '@/lib/auth'
 import { hasPermission } from '@/lib/auth'
 import { toast } from 'sonner'
 import { ShoppingCart, Clock, CheckCircle, Package, Eye } from '@phosphor-icons/react'
+import { useNotifications } from '@/store/notifications-store'
 
 interface OrdersViewProps {
   userRole: UserRole
@@ -92,6 +93,7 @@ export function OrdersView({ userRole, userId }: OrdersViewProps) {
   const [showApproveDialog, setShowApproveDialog] = useState(false)
   const [showRejectDialog, setShowRejectDialog] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const { addNotification } = useNotifications()
 
   const getFilteredOrders = (filter: string) => {
     if (!orders) return []
@@ -176,6 +178,15 @@ export function OrdersView({ userRole, userId }: OrdersViewProps) {
         description: `Status updated to ${newStatus.replace(/_/g, ' ').toLowerCase()}.`
       })
 
+      // Add notification for original SM
+      addNotification({
+        id: `${selectedOrder.orderId}-approved-${Date.now()}`,
+        message: `Order #${selectedOrder.orderId} has been approved by ${userRole}.`,
+        timestamp: new Date().toISOString(),
+        isRead: false,
+        orderId: selectedOrder.orderId,
+      })
+
       // Reset state
       setSelectedOrder(null)
       setShowApproveDialog(false)
@@ -206,9 +217,18 @@ export function OrdersView({ userRole, userId }: OrdersViewProps) {
         ) || []
       )
 
-      // Show success toast
-      toast.success(`Order #${selectedOrder.orderId.slice(-6)} rejected.`, {
-        description: 'The order has been rejected and the store manager has been notified.'
+      // Show error toast
+      toast.error(`Order #${selectedOrder.orderId.slice(-6)} rejected.`, {
+        description: `Reason: ${reason}`
+      })
+
+      // Add notification for original SM
+      addNotification({
+        id: `${selectedOrder.orderId}-rejected-${Date.now()}`,
+        message: `Order #${selectedOrder.orderId} has been rejected by ${userRole}. Reason: ${reason}`,
+        timestamp: new Date().toISOString(),
+        isRead: false,
+        orderId: selectedOrder.orderId,
       })
 
       // Reset state
