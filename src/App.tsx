@@ -11,6 +11,7 @@ import { GoodsReceiptView } from '@/components/orders/GoodsReceiptView'
 import { OrderReceivingPage } from '@/components/orders/OrderReceivingPage'
 import { VarianceResolutionView } from '@/components/orders/VarianceResolutionView'
 import { VarianceResolutionPage } from '@/components/orders/VarianceResolutionPage'
+import { AutomatedReplenishmentView } from '@/components/orders/AutomatedReplenishmentView'
 import { AuditDashboard } from '@/components/audit/AuditDashboard'
 import { PermissionsSummary } from '@/components/admin/PermissionsSummary'
 import { ComponentsDemo } from '@/components/ui/components-demo'
@@ -19,10 +20,11 @@ import { getCurrentUser, canAccessView, UserRole } from '@/lib/auth'
 import { toast } from 'sonner'
 import type { Order } from '@/types/orders'
 
-export type NavigationView = 'dashboard' | 'catalog' | 'orders' | 'goods-receipt' | 'variance-resolution' | 'audit' | 'analytics' | 'reports' | 'inventory' | 'users' | 'components'
+export type NavigationView = 'dashboard' | 'catalog' | 'orders' | 'goods-receipt' | 'variance-resolution' | 'automated-replenishment' | 'audit' | 'analytics' | 'reports' | 'inventory' | 'users' | 'components'
 
 function App() {
   const [currentUser, setCurrentUser] = useKV<any>('current_user', null)
+  const [orders] = useKV<Order[]>('orders', [])
   const [currentView, setCurrentView] = useState<NavigationView>('dashboard')
   const [isLoading, setIsLoading] = useState(true)
   const [selectedOrderForReceiving, setSelectedOrderForReceiving] = useState<Order | null>(null)
@@ -192,8 +194,15 @@ function App() {
             onNavigateToResolution={(order) => setSelectedOrderForVarianceResolution(order)}
           />
         )
+      case 'automated-replenishment':
+        return (
+          <AutomatedReplenishmentView
+            userRole={currentUser.role}
+            userId={currentUser.userId}
+          />
+        )
       case 'audit':
-        return <AuditDashboard />
+        return <AuditDashboard orders={orders ?? []} onNavigateToOrder={(orderId) => setCurrentView('orders')} />
       case 'analytics':
         return <div className="p-6"><h1 className="text-2xl font-semibold">Analytics Dashboard</h1><p className="text-muted-foreground">Analytics features coming soon...</p></div>
       case 'reports':

@@ -159,6 +159,7 @@ export function canAccessView(role: UserRole, view: string): boolean {
     'orders': null, // Everyone can view their orders
     'goods-receipt': 'canCreateOrders', // SM role for receiving goods
     'variance-resolution': 'canApproveOrders', // FM role for resolving variances
+    'automated-replenishment': 'canApproveOrders', // FM role for approving AI replenishment
     'inventory': 'canViewInventory',
     'analytics': 'canAccessAnalytics',
     'reports': 'canAccessReports',

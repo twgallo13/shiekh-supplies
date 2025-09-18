@@ -43,6 +43,12 @@ const navigationItems = [
     requiredPermission: 'canApproveOrders' as const
   },
   {
+    id: 'automated-replenishment' as NavigationView,
+    label: 'Automated Replenishment',
+    icon: ChartLineUp,
+    requiredPermission: 'canApproveOrders' as const
+  },
+  {
     id: 'inventory' as NavigationView,
     label: 'Inventory',
     icon: Stack,

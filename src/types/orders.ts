@@ -20,6 +20,12 @@ export interface LineItem {
     unitOfMeasure: string
     costPerUnit: number
     category: string
+    // Substitution fields
+    isSubstituted?: boolean
+    substitutedProductId?: string
+    substitutedProductName?: string
+    substitutedCostPerUnit?: number
+    substitutionReason?: string
     variance?: Variance
 }
 
@@ -37,12 +43,12 @@ export interface Order {
     storeName: string
     orderType: 'REPLENISHMENT' | 'AD_HOC'
     status: string
-    lineItems?: LineItem[]
+    lineItems: LineItem[]
     lineItemCount: number
     totalCost?: number
     createdAt: string
     createdByUserId: string
-    auditTrail?: AuditEntry[]
+    auditTrail: AuditEntry[]
     justification?: string
     expectedDeliveryDate?: string
 }
