@@ -130,6 +130,10 @@ export function Sidebar({ userRole, currentView, onViewChange }: SidebarProps) {
                     variant="ghost"
                     className="w-full justify-start gap-3 h-11 opacity-50 cursor-not-allowed"
                     disabled
+                    onClick={() => {
+                      // Show a toast when trying to access restricted content
+                      console.log(`Access denied: ${item.label} requires additional permissions`)
+                    }}
                   >
                     <div className="relative">
                       <Icon size={18} />

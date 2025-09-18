@@ -8,8 +8,7 @@ import { Catalog } from './components/catalog/Catalog'
 import { OrdersView } from '@/components/orders/OrdersView'
 import { AuditDashboard } from '@/components/audit/AuditDashboard'
 import { PermissionsSummary } from '@/components/admin/PermissionsSummary'
-import { getCurrentUser, canAccessView } from '@/lib/auth'
-import type { UserRole } from '@/lib/auth'
+import { getCurrentUser, canAccessView, UserRole } from '@/lib/auth'
 import { toast } from 'sonner'
 
 export type NavigationView = 'dashboard' | 'catalog' | 'orders' | 'audit' | 'analytics' | 'reports' | 'inventory' | 'users'
@@ -44,6 +43,63 @@ function App() {
   const handleLogout = () => {
     setCurrentUser(null)
     setCurrentView('dashboard')
+  }
+
+  const handleRoleSwitch = (newRole: UserRole) => {
+    const demoUsers = {
+      'SM': {
+        userId: 'demo-sm-1',
+        fullName: 'Sarah Chen',
+        email: 'sarah.chen@supplysync.com',
+        role: 'SM' as UserRole,
+        assignment: { type: 'store' as const, id: 'store-001', name: 'Downtown LA' }
+      },
+      'DM': {
+        userId: 'demo-dm-1', 
+        fullName: 'Marcus Johnson',
+        email: 'marcus.johnson@supplysync.com',
+        role: 'DM' as UserRole,
+        assignment: { type: 'district' as const, id: 'district-west', name: 'West Coast District' }
+      },
+      'FM': {
+        userId: 'demo-fm-1',
+        fullName: 'Elena Rodriguez',
+        email: 'elena.rodriguez@supplysync.com', 
+        role: 'FM' as UserRole,
+        assignment: { type: 'region' as const, id: 'region-west', name: 'Western Region' }
+      },
+      'ADMIN': {
+        userId: 'demo-admin-1',
+        fullName: 'David Kim',
+        email: 'david.kim@supplysync.com',
+        role: 'ADMIN' as UserRole,
+        assignment: { type: 'system' as const, id: 'system', name: 'System Wide' }
+      },
+      'COST_ANALYST': {
+        userId: 'demo-analyst-1',
+        fullName: 'Jennifer Liu',
+        email: 'jennifer.liu@supplysync.com',
+        role: 'COST_ANALYST' as UserRole,
+        assignment: { type: 'system' as const, id: 'system', name: 'System Wide' }
+      },
+      'AI_AGENT': {
+        userId: 'demo-ai-1',
+        fullName: 'AI Agent',
+        email: 'ai.agent@supplysync.com',
+        role: 'AI_AGENT' as UserRole,
+        assignment: { type: 'system' as const, id: 'system', name: 'System Wide' }
+      }
+    }
+
+    const newUser = demoUsers[newRole]
+    setCurrentUser(newUser)
+    
+    // Reset view to dashboard when switching roles
+    setCurrentView('dashboard')
+    
+    toast.success('Role switched', {
+      description: `Now viewing as ${newUser.fullName} (${newRole})`
+    })
   }
 
   if (isLoading) {
@@ -118,7 +174,11 @@ function App() {
           onViewChange={handleViewChange}
         />
         <div className="flex-1 min-h-screen">
-          <Header user={currentUser} onLogout={handleLogout} />
+          <Header 
+            user={currentUser} 
+            onLogout={handleLogout}
+            onRoleSwitch={handleRoleSwitch}
+          />
           <main className="p-6">
             {renderView()}
           </main>

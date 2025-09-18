@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { User, roleLabels, hasPermission } from '@/lib/auth'
+import { RolePermissionsDemo } from './demo/RolePermissionsDemo'
 import { ShoppingCart, Package, Clock, Warning, TrendUp, CheckCircle } from '@phosphor-icons/react'
 
 interface DashboardProps {
@@ -186,6 +187,8 @@ export function Dashboard({ user }: DashboardProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RolePermissionsDemo userRole={user.role} />
+        
         {(user.role === 'DM' || user.role === 'FM') && getPendingApprovals().length > 0 && (
           <Card>
             <CardHeader>

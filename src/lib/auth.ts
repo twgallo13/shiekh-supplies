@@ -122,6 +122,13 @@ export async function getCurrentUser(): Promise<User> {
         email: 'david.kim@supplysync.com',
         role: 'ADMIN',
         assignment: { type: 'system', id: 'system', name: 'System Wide' }
+      },
+      {
+        userId: 'demo-analyst-1',
+        fullName: 'Jennifer Liu',
+        email: 'jennifer.liu@supplysync.com',
+        role: 'COST_ANALYST',
+        assignment: { type: 'system', id: 'system', name: 'System Wide' }
       }
     ]
     
