@@ -161,7 +161,8 @@ export function canAccessView(role: UserRole, view: string): boolean {
     'analytics': 'canAccessAnalytics',
     'reports': 'canAccessReports',
     'audit': 'canAccessAudit',
-    'users': 'canManageUsers'
+    'users': 'canManageUsers',
+    'components': null // Everyone can access component demos
   } as const
 
   const requiredPermission = viewPermissions[view as keyof typeof viewPermissions]

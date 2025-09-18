@@ -8,10 +8,11 @@ import { Catalog } from './components/catalog/Catalog'
 import { OrdersView } from '@/components/orders/OrdersView'
 import { AuditDashboard } from '@/components/audit/AuditDashboard'
 import { PermissionsSummary } from '@/components/admin/PermissionsSummary'
+import { ComponentsDemo } from '@/components/ui/components-demo'
 import { getCurrentUser, canAccessView, UserRole } from '@/lib/auth'
 import { toast } from 'sonner'
 
-export type NavigationView = 'dashboard' | 'catalog' | 'orders' | 'audit' | 'analytics' | 'reports' | 'inventory' | 'users'
+export type NavigationView = 'dashboard' | 'catalog' | 'orders' | 'audit' | 'analytics' | 'reports' | 'inventory' | 'users' | 'components'
 
 function App() {
   const [currentUser, setCurrentUser] = useKV<any>('current_user', null)
@@ -160,6 +161,8 @@ function App() {
             <PermissionsSummary />
           </div>
         )
+      case 'components':
+        return <ComponentsDemo />
       default:
         return <Dashboard user={currentUser} />
     }

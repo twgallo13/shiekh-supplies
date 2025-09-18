@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { UserRole, hasPermission, roleLabels } from '@/lib/auth'
 import { NavigationView } from '@/App'
-import { House, Package, ShoppingCart, ChartLineUp, ClipboardText, ChartBar, FileText, Stack, Users, LockKey } from '@phosphor-icons/react'
+import { House, Package, ShoppingCart, ChartLineUp, ClipboardText, ChartBar, FileText, Stack, Users, LockKey, Palette } from '@phosphor-icons/react'
 
 interface SidebarProps {
   userRole: UserRole
@@ -59,6 +59,12 @@ const navigationItems = [
     label: 'Users',
     icon: Users,
     requiredPermission: 'canManageUsers' as const
+  },
+  {
+    id: 'components' as NavigationView,
+    label: 'Components',
+    icon: Palette,
+    requiredPermission: null
   }
 ]
 
