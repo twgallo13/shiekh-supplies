@@ -1,9 +1,6 @@
 import { useState } from 'react'
-import { 
-  EnhancedButton, 
-  LoadingButton, 
-  SuccessButton, 
-  ErrorButton 
+import {
+  EnhancedButton
 } from './enhanced-button'
 import { Plus, ArrowRight, Download, Trash } from '@phosphor-icons/react'
 
@@ -21,12 +18,12 @@ export function EnhancedButtonDemo() {
 
   const simulateAction = async (key: string, shouldFail = false) => {
     setLoadingStates(prev => ({ ...prev, [key]: true }))
-    
+
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 2000))
-    
+
     setLoadingStates(prev => ({ ...prev, [key]: false }))
-    
+
     if (shouldFail) {
       setErrorStates(prev => ({ ...prev, [key]: true }))
       setTimeout(() => {
@@ -43,7 +40,7 @@ export function EnhancedButtonDemo() {
   return (
     <div className="space-y-8 p-6">
       <h1 className="text-2xl font-bold">EnhancedButton Component States</h1>
-      
+
       {/* Basic Variants */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Button Variants</h2>
@@ -51,7 +48,7 @@ export function EnhancedButtonDemo() {
           <EnhancedButton variant="primary">Primary</EnhancedButton>
           <EnhancedButton variant="secondary">Secondary</EnhancedButton>
           <EnhancedButton variant="destructive">Destructive</EnhancedButton>
-          <EnhancedButton variant="outline">Outline</EnhancedButton>
+          <EnhancedButton variant="secondary">Secondary</EnhancedButton>
           <EnhancedButton variant="ghost">Ghost</EnhancedButton>
           <EnhancedButton variant="link">Link</EnhancedButton>
         </div>
@@ -64,7 +61,7 @@ export function EnhancedButtonDemo() {
           <EnhancedButton size="sm">Small</EnhancedButton>
           <EnhancedButton size="default">Default</EnhancedButton>
           <EnhancedButton size="lg">Large</EnhancedButton>
-          <EnhancedButton size="icon"><Plus /></EnhancedButton>
+          <EnhancedButton size="sm"><Plus /></EnhancedButton>
         </div>
       </div>
 
@@ -159,9 +156,9 @@ export function EnhancedButtonDemo() {
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Predefined State Components</h2>
         <div className="flex flex-wrap gap-3">
-          <LoadingButton>Loading Button</LoadingButton>
-          <SuccessButton>Success Button</SuccessButton>
-          <ErrorButton>Error Button</ErrorButton>
+          <EnhancedButton loading>Loading Button</EnhancedButton>
+          <EnhancedButton success>Success Button</EnhancedButton>
+          <EnhancedButton error>Error Button</EnhancedButton>
         </div>
       </div>
 
@@ -192,7 +189,7 @@ export function EnhancedButtonDemo() {
               </EnhancedButton>
               <EnhancedButton
                 size="sm"
-                variant="outline"
+                variant="secondary"
                 leftIcon={<ArrowRight />}
               >
                 View Details
@@ -234,7 +231,7 @@ export function EnhancedButtonDemo() {
         <div className="flex flex-wrap gap-3">
           <EnhancedButton disabled>Disabled Primary</EnhancedButton>
           <EnhancedButton variant="secondary" disabled>Disabled Secondary</EnhancedButton>
-          <EnhancedButton variant="outline" disabled>Disabled Outline</EnhancedButton>
+          <EnhancedButton variant="secondary" disabled>Disabled Secondary</EnhancedButton>
           <EnhancedButton variant="destructive" disabled>Disabled Destructive</EnhancedButton>
         </div>
       </div>
