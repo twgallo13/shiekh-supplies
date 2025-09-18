@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { UserRole, hasPermission, roleLabels } from '@/lib/auth'
 import { NavigationView } from '@/App'
-import { House, Package, ShoppingCart, ChartLineUp, ClipboardText, ChartBar, FileText, Stack, Users, LockKey, Palette } from '@phosphor-icons/react'
+import { House, Package, ShoppingCart, ChartLineUp, ClipboardText, ChartBar, FileText, Stack, Users, LockKey, Palette, Truck, Flag } from '@phosphor-icons/react'
 
 interface SidebarProps {
   userRole: UserRole
@@ -29,6 +29,18 @@ const navigationItems = [
     label: 'Orders',
     icon: ShoppingCart,
     requiredPermission: null
+  },
+  {
+    id: 'goods-receipt' as NavigationView,
+    label: 'Goods Receipt',
+    icon: Truck,
+    requiredPermission: 'canCreateOrders' as const
+  },
+  {
+    id: 'variance-resolution' as NavigationView,
+    label: 'Variance Resolution',
+    icon: Flag,
+    requiredPermission: 'canApproveOrders' as const
   },
   {
     id: 'inventory' as NavigationView,
@@ -69,11 +81,11 @@ const navigationItems = [
 ]
 
 export function Sidebar({ userRole, currentView, onViewChange }: SidebarProps) {
-  const visibleItems = navigationItems.filter(item => 
+  const visibleItems = navigationItems.filter(item =>
     !item.requiredPermission || hasPermission(userRole, item.requiredPermission)
   )
 
-  const hiddenItems = navigationItems.filter(item => 
+  const hiddenItems = navigationItems.filter(item =>
     item.requiredPermission && !hasPermission(userRole, item.requiredPermission)
   )
 
@@ -107,7 +119,7 @@ export function Sidebar({ userRole, currentView, onViewChange }: SidebarProps) {
           {visibleItems.map((item) => {
             const Icon = item.icon
             const isActive = currentView === item.id
-            
+
             return (
               <Button
                 key={item.id}
@@ -123,7 +135,7 @@ export function Sidebar({ userRole, currentView, onViewChange }: SidebarProps) {
               </Button>
             )
           })}
-          
+
           {/* Show restricted items with lock icon if any exist */}
           {hiddenItems.length > 0 && (
             <div className="pt-2 mt-2 border-t border-border">

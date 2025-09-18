@@ -7,19 +7,26 @@ import { Sidebar } from './components/layout/Sidebar'
 import { Catalog } from './components/catalog/Catalog'
 import { CartSheet } from './components/cart/CartSheet'
 import { OrdersView } from '@/components/orders/OrdersView'
+import { GoodsReceiptView } from '@/components/orders/GoodsReceiptView'
+import { OrderReceivingPage } from '@/components/orders/OrderReceivingPage'
+import { VarianceResolutionView } from '@/components/orders/VarianceResolutionView'
+import { VarianceResolutionPage } from '@/components/orders/VarianceResolutionPage'
 import { AuditDashboard } from '@/components/audit/AuditDashboard'
 import { PermissionsSummary } from '@/components/admin/PermissionsSummary'
 import { ComponentsDemo } from '@/components/ui/components-demo'
 import { Toaster } from '@/components/ui/sonner'
 import { getCurrentUser, canAccessView, UserRole } from '@/lib/auth'
 import { toast } from 'sonner'
+import type { Order } from '@/types/orders'
 
-export type NavigationView = 'dashboard' | 'catalog' | 'orders' | 'audit' | 'analytics' | 'reports' | 'inventory' | 'users' | 'components'
+export type NavigationView = 'dashboard' | 'catalog' | 'orders' | 'goods-receipt' | 'variance-resolution' | 'audit' | 'analytics' | 'reports' | 'inventory' | 'users' | 'components'
 
 function App() {
   const [currentUser, setCurrentUser] = useKV<any>('current_user', null)
   const [currentView, setCurrentView] = useState<NavigationView>('dashboard')
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedOrderForReceiving, setSelectedOrderForReceiving] = useState<Order | null>(null)
+  const [selectedOrderForVarianceResolution, setSelectedOrderForVarianceResolution] = useState<Order | null>(null)
 
   useEffect(() => {
     const initializeUser = async () => {
@@ -145,6 +152,46 @@ function App() {
         return <Catalog userRole={currentUser.role} />
       case 'orders':
         return <OrdersView userRole={currentUser.role} userId={currentUser.userId} />
+      case 'goods-receipt':
+        if (selectedOrderForReceiving) {
+          return (
+            <OrderReceivingPage
+              order={selectedOrderForReceiving}
+              onGoBack={() => setSelectedOrderForReceiving(null)}
+              onOrderCompleted={(updatedOrder) => {
+                // Handle order completion
+                setSelectedOrderForReceiving(null)
+              }}
+            />
+          )
+        }
+        return (
+          <GoodsReceiptView
+            userRole={currentUser.role}
+            userId={currentUser.userId}
+            onNavigateToReceiving={(order) => setSelectedOrderForReceiving(order)}
+          />
+        )
+      case 'variance-resolution':
+        if (selectedOrderForVarianceResolution) {
+          return (
+            <VarianceResolutionPage
+              order={selectedOrderForVarianceResolution}
+              onGoBack={() => setSelectedOrderForVarianceResolution(null)}
+              onOrderResolved={(updatedOrder) => {
+                // Handle order resolution
+                setSelectedOrderForVarianceResolution(null)
+              }}
+            />
+          )
+        }
+        return (
+          <VarianceResolutionView
+            userRole={currentUser.role}
+            userId={currentUser.userId}
+            onNavigateToResolution={(order) => setSelectedOrderForVarianceResolution(order)}
+          />
+        )
       case 'audit':
         return <AuditDashboard />
       case 'analytics':

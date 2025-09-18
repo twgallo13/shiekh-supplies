@@ -14,7 +14,7 @@ export interface User {
 
 export const roleLabels: Record<UserRole, string> = {
   'SM': 'Store Manager',
-  'DM': 'District Manager', 
+  'DM': 'District Manager',
   'FM': 'Facility Manager',
   'ADMIN': 'Administrator',
   'COST_ANALYST': 'Cost Analyst',
@@ -93,7 +93,7 @@ export const rolePermissions = {
 export async function getCurrentUser(): Promise<User> {
   try {
     const sparkUser = await (window as any).spark?.user?.()
-    
+
     const demoUsers: User[] = [
       {
         userId: 'demo-sm-1',
@@ -103,7 +103,7 @@ export async function getCurrentUser(): Promise<User> {
         assignment: { type: 'store', id: 'store-001', name: 'Downtown LA' }
       },
       {
-        userId: 'demo-dm-1', 
+        userId: 'demo-dm-1',
         fullName: 'Marcus Johnson',
         email: 'marcus.johnson@supplysync.com',
         role: 'DM',
@@ -112,7 +112,7 @@ export async function getCurrentUser(): Promise<User> {
       {
         userId: 'demo-fm-1',
         fullName: 'Elena Rodriguez',
-        email: 'elena.rodriguez@supplysync.com', 
+        email: 'elena.rodriguez@supplysync.com',
         role: 'FM',
         assignment: { type: 'region', id: 'region-west', name: 'Western Region' }
       },
@@ -131,7 +131,7 @@ export async function getCurrentUser(): Promise<User> {
         assignment: { type: 'system', id: 'system', name: 'System Wide' }
       }
     ]
-    
+
     const userIndex = Math.floor(Date.now() / 60000) % demoUsers.length
     return demoUsers[userIndex]
   } catch (error) {
@@ -157,6 +157,8 @@ export function canAccessView(role: UserRole, view: string): boolean {
     'dashboard': null, // Everyone can access dashboard
     'catalog': 'canCreateOrders',
     'orders': null, // Everyone can view their orders
+    'goods-receipt': 'canCreateOrders', // SM role for receiving goods
+    'variance-resolution': 'canApproveOrders', // FM role for resolving variances
     'inventory': 'canViewInventory',
     'analytics': 'canAccessAnalytics',
     'reports': 'canAccessReports',
@@ -167,6 +169,6 @@ export function canAccessView(role: UserRole, view: string): boolean {
 
   const requiredPermission = viewPermissions[view as keyof typeof viewPermissions]
   if (!requiredPermission) return true
-  
+
   return hasPermission(role, requiredPermission as keyof typeof rolePermissions.SM)
 }
