@@ -1,11 +1,13 @@
 
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
 import { useCartStore } from '@/stores/cart-store'
+import { pdpTelemetry } from '@/lib/telemetry'
+import type { User } from '@/lib/auth'
 
 interface Product {
     productId: string
@@ -13,10 +15,18 @@ interface Product {
     productName: string
     description: string
     category: string
+    needType?: string
+    equivalentUnit?: string
     unitOfMeasure: string
+    itemsPerUnit?: number
     imageUrl?: string
     isRestricted: boolean
-    costPerUnit: number
+    costPerUnit?: number
+    bufferStockLevel?: number
+    supplyDurationDays?: number
+    vendorSkuMap?: Record<string, string>
+    barcodeAliases?: string[]
+    variants?: Product[]
 }
 
 interface ProductDetailsPageProps {
@@ -26,13 +36,66 @@ interface ProductDetailsPageProps {
 
 export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetailsPageProps) => {
     const [products] = useKV<Product[]>('products', [])
+    const [currentUser] = useKV<User | null>('current_user', null)
     const addItem = useCartStore((state) => state.addItem)
+    const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
+    const [announceText, setAnnounceText] = useState<string>('')
 
-    const product = useMemo(() => {
+    const baseProduct = useMemo(() => {
         return products?.find((p) => p.productId === productId)
     }, [products, productId])
 
-    if (!product) {
+    // Find functional substitution candidates based on needType + equivalentUnit
+    const functionalSubstitutes = useMemo(() => {
+        if (!baseProduct?.needType || !baseProduct?.equivalentUnit) return []
+
+        return (products || []).filter(p =>
+            p.productId !== baseProduct.productId &&
+            p.needType === baseProduct.needType &&
+            p.equivalentUnit === baseProduct.equivalentUnit
+        )
+    }, [products, baseProduct])
+
+    // Combine explicit variants with functional substitutes
+    const allVariants = useMemo(() => {
+        const variants = baseProduct?.variants || []
+        const substitutes = functionalSubstitutes
+
+        // Deduplicate by productId
+        const seen = new Set(variants.map(v => v.productId))
+        const uniqueSubstitutes = substitutes.filter(s => !seen.has(s.productId))
+
+        return [...variants, ...uniqueSubstitutes]
+    }, [baseProduct?.variants, functionalSubstitutes])
+
+    // The currently displayed product (base or selected variant)
+    const product = useMemo(() => {
+        if (!baseProduct) return null
+        if (!selectedVariantId) return baseProduct
+
+        const variant = allVariants.find(v => v.productId === selectedVariantId)
+        return variant || baseProduct
+    }, [baseProduct, selectedVariantId, allVariants])
+
+    // Emit view_product telemetry on mount
+    useEffect(() => {
+        if (baseProduct) {
+            pdpTelemetry.viewProduct(
+                {
+                    productId: baseProduct.productId,
+                    sku: baseProduct.sku,
+                    category: baseProduct.category
+                },
+                currentUser ? {
+                    userId: currentUser.userId,
+                    userRole: currentUser.role,
+                    clientIp: null // Not available in frontend context
+                } : undefined
+            )
+        }
+    }, [baseProduct, currentUser])
+
+    if (!baseProduct || !product) {
         return (
             <div className="text-center">
                 <p>Product not found.</p>
@@ -52,6 +115,21 @@ export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetail
             isRestricted: product.isRestricted,
             costPerUnit: product.costPerUnit
         })
+
+        // Emit add_to_cart telemetry
+        pdpTelemetry.addToCart(
+            {
+                productId: product.productId,
+                sku: product.sku,
+                qty: 1
+            },
+            currentUser ? {
+                userId: currentUser.userId,
+                userRole: currentUser.role,
+                clientIp: null
+            } : undefined
+        )
+
         toast.success(`${product.productName} added to cart.`)
     }
 
@@ -64,46 +142,256 @@ export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetail
             isRestricted: product.isRestricted,
             costPerUnit: product.costPerUnit
         })
+
+        // Emit add_to_cart telemetry (same event for restricted items)
+        pdpTelemetry.addToCart(
+            {
+                productId: product.productId,
+                sku: product.sku,
+                qty: 1
+            },
+            currentUser ? {
+                userId: currentUser.userId,
+                userRole: currentUser.role,
+                clientIp: null
+            } : undefined
+        )
+
         toast.info(`${product.productName} added to cart for approval.`)
     }
 
+    const formatCurrency = (amount?: number) => {
+        if (amount == null) return undefined
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
+    }
+
+    const price = formatCurrency(product.costPerUnit)
+    const vendorEntries = Object.entries(product.vendorSkuMap ?? {})
+
     return (
         <div>
-            <Button onClick={onBackToCatalog} variant="outline" className="mb-4">
+            {/* Screen reader announcements for variant/price changes */}
+            <div aria-live="polite" aria-atomic="true" className="sr-only">
+                {announceText}
+            </div>
+
+            <Button
+                onClick={onBackToCatalog}
+                variant="outline"
+                className="mb-4"
+                aria-label="Go back to product catalog"
+            >
                 &larr; Back to Catalog
             </Button>
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-2xl">{product.productName}</CardTitle>
+                    <div className="flex items-start justify-between gap-4">
+                        <div>
+                            <CardTitle className="text-2xl" id="product-title">{product.productName}</CardTitle>
+                            <div className="mt-2 flex items-center gap-2">
+                                <Badge aria-label={`Category: ${product.category}`}>{product.category}</Badge>
+                                {product.isRestricted && (
+                                    <Badge variant="destructive" aria-label="This item is restricted and requires approval">
+                                        Restricted
+                                    </Badge>
+                                )}
+                            </div>
+                        </div>
+                        {price && (
+                            <div className="text-2xl font-bold">{price}</div>
+                        )}
+                    </div>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    {/* Gallery */}
                     <div>
-                        <img
-                            src={product.imageUrl}
-                            alt={product.productName}
-                            className="mb-4 aspect-square w-full max-w-md rounded-lg object-cover"
-                        />
+                        {product.imageUrl ? (
+                            <img
+                                src={product.imageUrl}
+                                alt={`Product image for ${product.productName}`}
+                                className="mb-4 aspect-square w-full max-w-md rounded-lg object-cover"
+                                role="img"
+                            />
+                        ) : (
+                            <div
+                                className="mb-4 aspect-square w-full max-w-md rounded-lg bg-muted flex items-center justify-center text-muted-foreground"
+                                role="img"
+                                aria-label={`No image available for ${product.productName}`}
+                            >
+                                No image available
+                            </div>
+                        )}
                     </div>
-                    <div className="space-y-4">
-                        <p className="text-lg text-gray-600">{product.description}</p>
-                        <div>
-                            <Badge>{product.category}</Badge>
-                        </div>
-                        <p className="text-3xl font-bold">${product.costPerUnit.toFixed(2)}</p>
-                        <p>
-                            <span className="font-semibold">SKU:</span> {product.sku}
-                        </p>
 
-                        <div className="pt-4">
+                    {/* Details */}
+                    <div className="space-y-4" role="main" aria-labelledby="product-title">
+                        <p className="text-base text-muted-foreground">{product.description || 'No description provided.'}</p>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="text-sm">
+                                <div className="text-muted-foreground">Unit</div>
+                                <div className="font-medium">
+                                    {product.unitOfMeasure}
+                                    {product.itemsPerUnit ? ` · ${product.itemsPerUnit}/unit` : ''}
+                                </div>
+                            </div>
+                            <div className="text-sm">
+                                <div className="text-muted-foreground">SKU</div>
+                                <div className="font-medium">{product.sku}</div>
+                            </div>
+                            <div className="text-sm">
+                                <div className="text-muted-foreground">Product ID</div>
+                                <div className="font-medium">{product.productId}</div>
+                            </div>
+                            {typeof product.bufferStockLevel === 'number' && (
+                                <div className="text-sm">
+                                    <div className="text-muted-foreground">Buffer Stock Level</div>
+                                    <div className="font-medium">{product.bufferStockLevel}</div>
+                                </div>
+                            )}
+                            {typeof product.supplyDurationDays === 'number' && (
+                                <div className="text-sm">
+                                    <div className="text-muted-foreground">Supply Duration</div>
+                                    <div className="font-medium">{product.supplyDurationDays} days</div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Vendor + Barcodes */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="text-sm">
+                                <div className="text-muted-foreground">Vendor SKUs</div>
+                                {vendorEntries.length > 0 ? (
+                                    <div className="mt-1 space-y-1">
+                                        {vendorEntries.slice(0, 3).map(([vendor, sku]) => (
+                                            <div key={vendor} className="font-mono text-xs">{vendor}: {sku}</div>
+                                        ))}
+                                        {vendorEntries.length > 3 && (
+                                            <div className="text-xs text-muted-foreground">+{vendorEntries.length - 3} more</div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="font-medium">—</div>
+                                )}
+                            </div>
+                            <div className="text-sm">
+                                <div className="text-muted-foreground">Barcode Aliases</div>
+                                {(product.barcodeAliases && product.barcodeAliases.length > 0) ? (
+                                    <div className="mt-1 flex flex-wrap gap-1">
+                                        {product.barcodeAliases.slice(0, 6).map((code) => (
+                                            <Badge key={code} variant="outline" className="font-mono text-[11px]">{code}</Badge>
+                                        ))}
+                                        {product.barcodeAliases.length > 6 && (
+                                            <div className="text-xs text-muted-foreground">+{product.barcodeAliases.length - 6} more</div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="font-medium">—</div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Variants & Substitutes */}
+                        {allVariants.length > 0 && (
+                            <div className="space-y-3">
+                                <div className="text-sm text-muted-foreground" id="variants-label">
+                                    {baseProduct.variants?.length ? 'Variants' : 'Functional Substitutes'}
+                                    {baseProduct.needType && baseProduct.equivalentUnit && (
+                                        <span className="ml-2 text-xs">
+                                            ({baseProduct.needType} • {baseProduct.equivalentUnit})
+                                        </span>
+                                    )}
+                                </div>
+                                <div
+                                    className="grid grid-cols-1 gap-2"
+                                    role="radiogroup"
+                                    aria-labelledby="variants-label"
+                                    aria-describedby="variant-help"
+                                >
+                                    <div id="variant-help" className="sr-only">
+                                        Use arrow keys to navigate between variants. Press Enter or Space to select a variant.
+                                    </div>
+
+                                    {/* Current selection */}
+                                    <Button
+                                        variant={!selectedVariantId ? "default" : "outline"}
+                                        size="sm"
+                                        onClick={() => {
+                                            setSelectedVariantId(null)
+                                            setAnnounceText(`Selected ${baseProduct.productName} at ${formatCurrency(baseProduct.costPerUnit) || 'price not available'}`)
+                                        }}
+                                        className="justify-start text-left h-auto p-3"
+                                        role="radio"
+                                        aria-checked={!selectedVariantId}
+                                        aria-describedby={`variant-${baseProduct.productId}-details`}
+                                        tabIndex={!selectedVariantId ? 0 : -1}
+                                    >
+                                        <div className="flex flex-col items-start">
+                                            <div className="font-medium">{baseProduct.productName}</div>
+                                            <div className="text-xs text-muted-foreground" id={`variant-${baseProduct.productId}-details`}>
+                                                {baseProduct.sku} • {formatCurrency(baseProduct.costPerUnit) || 'Price not available'}
+                                            </div>
+                                        </div>
+                                    </Button>
+
+                                    {/* Variants/Substitutes */}
+                                    {allVariants.map((variant) => (
+                                        <Button
+                                            key={variant.productId}
+                                            variant={selectedVariantId === variant.productId ? "default" : "outline"}
+                                            size="sm"
+                                            onClick={() => {
+                                                setSelectedVariantId(variant.productId)
+                                                setAnnounceText(`Selected ${variant.productName} at ${formatCurrency(variant.costPerUnit) || 'price not available'}`)
+                                            }}
+                                            className="justify-start text-left h-auto p-3"
+                                            role="radio"
+                                            aria-checked={selectedVariantId === variant.productId}
+                                            aria-describedby={`variant-${variant.productId}-details`}
+                                            tabIndex={selectedVariantId === variant.productId ? 0 : -1}
+                                        >
+                                            <div className="flex flex-col items-start">
+                                                <div className="font-medium">{variant.productName}</div>
+                                                <div className="text-xs text-muted-foreground" id={`variant-${variant.productId}-details`}>
+                                                    {variant.sku} • {formatCurrency(variant.costPerUnit) || 'Price not available'}
+                                                </div>
+                                            </div>
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Inventory stub */}
+                        <div className="rounded-md border p-3 text-sm text-muted-foreground">
+                            Availability data not connected
+                        </div>
+
+                        {/* CTAs */}
+                        <div className="pt-2">
                             {product.isRestricted ? (
-                                <Button size="lg" onClick={handleRequestApproval}>
+                                <Button
+                                    size="lg"
+                                    onClick={handleRequestApproval}
+                                    aria-describedby="restricted-help"
+                                >
                                     Request Approval
                                 </Button>
                             ) : (
-                                <Button size="lg" onClick={handleAddToCart}>
+                                <Button
+                                    size="lg"
+                                    onClick={handleAddToCart}
+                                    aria-describedby="addtocart-help"
+                                >
                                     Add to Cart
                                 </Button>
                             )}
+                            <div id="restricted-help" className="sr-only">
+                                This item requires approval before it can be ordered
+                            </div>
+                            <div id="addtocart-help" className="sr-only">
+                                Add one unit of this item to your shopping cart
+                            </div>
                         </div>
                     </div>
                 </CardContent>

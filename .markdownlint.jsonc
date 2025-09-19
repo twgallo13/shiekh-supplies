@@ -1,0 +1,14 @@
+{
+    // Allow long lines in prose-heavy docs
+    "MD013": false,
+    // Allow these semantic HTML tags that appear in our docs
+    "MD033": {
+        "allowed_elements": [
+            "aside",
+            "nav",
+            "main",
+            "button",
+            "form"
+        ]
+    }
+}
