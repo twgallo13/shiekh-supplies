@@ -20,6 +20,7 @@
 - [Accessibility & Performance Budgets](#accessibility--performance-budgets)
 - [Migration & Rollback Plan](#migration--rollback-plan)
 - [Acceptance Tests & Validation Rules](#acceptance-tests--validation-rules)
+- [Contributor Guidelines & Development Standards](#contributor-guidelines--development-standards)
 - [Release Notes & Changelog](#release-notes--changelog)
 
 <aside>
@@ -59,24 +60,24 @@ The platform is governed by five **core strategic goals**:
     - Zero operational surprises through predictive analytics and replenishment triggers.
     - Enforcement of **seasonality buffers** and configurable safety stock levels.
     - Receiving workflows include **barcode alias handling** to adapt dynamically to vendor variations
-        
+
         [Objective: Seamlessly integrat…](https://drive.google.com/file/d/1nKnT8wG2OemdKivz_ukpw9Rnmc1LBF0mcv_YQdlqBEE).
-        
+
 2. **Lowest Landed Cost**
     - Vendor selection follows strict, deterministic logic:
-        
+
         **Cost → Lead Time → Preferred Vendor → SLA Compliance**.
-        
+
     - Support for **functional substitution** (e.g., any “Glass Cleaner” SKU normalized via equivalentUnit) ensures the lowest comparable cost per unit
-        
+
         [Objective: Seamlessly integrat…](https://drive.google.com/file/d/1nKnT8wG2OemdKivz_ukpw9Rnmc1LBF0mcv_YQdlqBEE)[Sup v8](https://drive.google.com/file/d/1CjeaEsNuDXxxeUMR58Eb4I2B_Cw6p_mhpspJdgqAQtE).
-        
+
 3. **Governance & Compliance**
     - **Immutable, append-only audit logs** with actor, timestamp, and mandatory reason codes.
     - Full **audit dashboard** with filtering, drill-downs, and export capability for compliance reviews
-        
+
         [Objective: Seamlessly integrat…](https://drive.google.com/file/d/1nKnT8wG2OemdKivz_ukpw9Rnmc1LBF0mcv_YQdlqBEE).
-        
+
     - **Quarterly access reviews** enforce the principle of least privilege.
 4. **Role-Aware Control**
     - **Facility Managers (FM)**: Final authority on fulfillment, overrides, and logistics.
@@ -85,9 +86,9 @@ The platform is governed by five **core strategic goals**:
     - **Admins**: Configure rules, manage users, and oversee audits.
     - **Cost Analysts**: Read-only access for financial validation.
     - **AI Agents**: Predictive automation, sourcing optimization, anomaly detection
-        
+
         [Objective: Seamlessly integrat…](https://drive.google.com/file/d/1nKnT8wG2OemdKivz_ukpw9Rnmc1LBF0mcv_YQdlqBEE)[Supply Version 9.1.0](https://drive.google.com/file/d/16sUD0p5Kzk4kv0bg_5chbPK_xfinfX0BiyFs5KfTkPQ)[Sup v8](https://drive.google.com/file/d/1CjeaEsNuDXxxeUMR58Eb4I2B_Cw6p_mhpspJdgqAQtE).
-        
+
 5. **System Security & Privacy**
     - **No public endpoints** — all services are internal, behind an API gateway.
     - **SSO/OIDC authentication**, short-lived JWT sessions, and signed URLs for assets.
@@ -119,14 +120,14 @@ This matrix defines the scope, responsibilities, and system permissions for each
 
 - **Scope:** Limited to one store.
 - **Core Responsibilities:**
-    - Initiate ad-hoc orders from the **Storefront Catalog**.
-    - Confirm deliveries via **case-scan, piece-scan, or barcode alias workflows**.
-    - Report variances with mandatory photo and notes.
-    - Track order status and history.
+  - Initiate ad-hoc orders from the **Storefront Catalog**.
+  - Confirm deliveries via **case-scan, piece-scan, or barcode alias workflows**.
+  - Report variances with mandatory photo and notes.
+  - Track order status and history.
 - **Key Use Cases:**
-    - UC-1.1: Submit request for a restricted POS terminal → Status: PENDING_DM_APPROVAL.
-    - UC-1.2: Track shipment → See partial shipment with multiple tracking numbers.
-    - UC-1.3: Report damaged goods → Variance logged, FM resolution required.
+  - UC-1.1: Submit request for a restricted POS terminal → Status: PENDING_DM_APPROVAL.
+  - UC-1.2: Track shipment → See partial shipment with multiple tracking numbers.
+  - UC-1.3: Report damaged goods → Variance logged, FM resolution required.
 
 ---
 
@@ -134,13 +135,13 @@ This matrix defines the scope, responsibilities, and system permissions for each
 
 - **Scope:** Manages multiple stores in a district.
 - **Core Responsibilities:**
-    - Approve/reject **store-initiated requests** (restricted items, off-cycle orders).
-    - Enforce budget, allotments, and approval thresholds.
-    - Monitor compliance via variance rates and spending dashboards.
+  - Approve/reject **store-initiated requests** (restricted items, off-cycle orders).
+  - Enforce budget, allotments, and approval thresholds.
+  - Monitor compliance via variance rates and spending dashboards.
 - **Key Use Cases:**
-    - UC-2.1: Review high-cost POS terminal request → Approve with justification.
-    - UC-2.2: Reject unapproved product request → Provide **mandatory reasonCode**.
-    - UC-2.3: Escalation: Inaction >48h auto-flags to DM’s supervisor.
+  - UC-2.1: Review high-cost POS terminal request → Approve with justification.
+  - UC-2.2: Reject unapproved product request → Provide **mandatory reasonCode**.
+  - UC-2.3: Escalation: Inaction >48h auto-flags to DM’s supervisor.
 
 ---
 
@@ -148,14 +149,14 @@ This matrix defines the scope, responsibilities, and system permissions for each
 
 - **Scope:** Oversees fulfillment/logistics across a facility region.
 - **Core Responsibilities:**
-    - Final approver for all **replenishment & DM-approved requests**.
-    - Decide fulfillment method (**WAREHOUSE vs DIRECT_SHIP**).
-    - Override vendors or shipment cadence (requires **reasonCode**, immutably logged).
-    - Approve new UPC aliases submitted by stores.
+  - Final approver for all **replenishment & DM-approved requests**.
+  - Decide fulfillment method (**WAREHOUSE vs DIRECT_SHIP**).
+  - Override vendors or shipment cadence (requires **reasonCode**, immutably logged).
+  - Approve new UPC aliases submitted by stores.
 - **Key Use Cases:**
-    - UC-3.1: Approve consolidated replenishment PO generated by AI.
-    - UC-3.2: Override vendor due to stockout risk.
-    - UC-3.3: Approve new UPC alias and update schema.
+  - UC-3.1: Approve consolidated replenishment PO generated by AI.
+  - UC-3.2: Override vendor due to stockout risk.
+  - UC-3.3: Approve new UPC alias and update schema.
 
 ---
 
@@ -163,14 +164,14 @@ This matrix defines the scope, responsibilities, and system permissions for each
 
 - **Scope:** System-wide, configuration-focused.
 - **Core Responsibilities:**
-    - Manage users, roles, and permissions (RBAC).
-    - Configure catalog restrictions, allotment tiers, and approval rules.
-    - Oversee immutable audit logs.
-    - Must re-authenticate via MFA for sensitive changes.
+  - Manage users, roles, and permissions (RBAC).
+  - Configure catalog restrictions, allotment tiers, and approval rules.
+  - Oversee immutable audit logs.
+  - Must re-authenticate via MFA for sensitive changes.
 - **Key Use Cases:**
-    - UC-4.1: Create a new DM user and assign district.
-    - UC-4.2: Configure POS terminals as restricted.
-    - UC-4.3: Export FM override logs for quarterly compliance review.
+  - UC-4.1: Create a new DM user and assign district.
+  - UC-4.2: Configure POS terminals as restricted.
+  - UC-4.3: Export FM override logs for quarterly compliance review.
 
 ---
 
@@ -178,13 +179,13 @@ This matrix defines the scope, responsibilities, and system permissions for each
 
 - **Scope:** System-wide, read-only.
 - **Core Responsibilities:**
-    - Analyze costs, landed price variances, vendor SLA breaches.
-    - Validate sourcing logic effectiveness.
-    - Build dashboards and reports.
+  - Analyze costs, landed price variances, vendor SLA breaches.
+  - Validate sourcing logic effectiveness.
+  - Build dashboards and reports.
 - **Key Use Cases:**
-    - UC-5.1: Generate quarterly cost variance report.
-    - UC-5.2: Receive vendor SLA breach alert.
-    - UC-5.3: Track FM overrides’ financial impact.
+  - UC-5.1: Generate quarterly cost variance report.
+  - UC-5.2: Receive vendor SLA breach alert.
+  - UC-5.3: Track FM overrides’ financial impact.
 
 ---
 
@@ -192,14 +193,14 @@ This matrix defines the scope, responsibilities, and system permissions for each
 
 - **Scope:** Autonomous, system-wide.
 - **Core Responsibilities:**
-    - Generate predictive replenishment orders using **Forecasted Daily Usage (FDU)** and **supplyDurationDays**.
-    - Enforce **lowest landed cost vendor logic**.
-    - Detect anomalies (usage spikes >300%).
-    - Log all actions immutably.
+  - Generate predictive replenishment orders using **Forecasted Daily Usage (FDU)** and **supplyDurationDays**.
+  - Enforce **lowest landed cost vendor logic**.
+  - Detect anomalies (usage spikes >300%).
+  - Log all actions immutably.
 - **Key Use Cases:**
-    - UC-6.1: Nightly replenishment run creates consolidated orders.
-    - UC-6.2: Detect SLA breach and alert FM.
-    - UC-6.3: Substitute equivalent unit products to minimize landed cost.
+  - UC-6.1: Nightly replenishment run creates consolidated orders.
+  - UC-6.2: Detect SLA breach and alert FM.
+  - UC-6.3: Substitute equivalent unit products to minimize landed cost.
 
 ---
 
@@ -283,11 +284,11 @@ await fetch(`${API_BASE}/api/v1/orders`, {
 2. **Order Creation**
     - If inventory ≤ ROP, line items are created.
     - Items grouped by SKU, optimized by:
-        
+
         **Lowest Cost → Shortest Lead Time → Preferred Vendor Rank**
-        
+
         [Supply Version 9.1.0](https://drive.google.com/file/d/16sUD0p5Kzk4kv0bg_5chbPK_xfinfX0BiyFs5KfTkPQ).
-        
+
     - State: ORDER_PENDING_FM_APPROVAL.
 3. **FM Review**
     - FM approves → Order transmitted to vendor (API/EDI).
@@ -391,9 +392,8 @@ curl -X POST "$API_BASE/api/v1/products/9b0c6c6c-2b7f-4ff8-9a37-6e7d3e2eaa11/ali
     - Accept → Close order + trigger financial reconciliation.
     - Dispute → Offline vendor process; order held until resolution.
     - State: CLOSED
-        
+
         [Objective: Seamlessly integrat…](https://drive.google.com/file/d/1nKnT8wG2OemdKivz_ukpw9Rnmc1LBF0mcv_YQdlqBEE)[Supply Version 9.1.0](https://drive.google.com/file/d/16sUD0p5Kzk4kv0bg_5chbPK_xfinfX0BiyFs5KfTkPQ).
-        
 
 ---
 
@@ -412,19 +412,18 @@ curl -X POST "$API_BASE/api/v1/products/9b0c6c6c-2b7f-4ff8-9a37-6e7d3e2eaa11/ali
 ## **3.6 Replenishment & Substitution Logic**
 
 - **Functional Substitution:**
-    - Orders satisfied by *needType* (e.g., “Glass Cleaner”), not brand.
-    - EquivalentUnit normalization ensures cost-per-unit comparability.
-    - Vendor engine: Check store minimums → Prefer refills → Select lowest landed cost mix
-        
+  - Orders satisfied by *needType* (e.g., “Glass Cleaner”), not brand.
+  - EquivalentUnit normalization ensures cost-per-unit comparability.
+  - Vendor engine: Check store minimums → Prefer refills → Select lowest landed cost mix
+
         [Objective: Seamlessly integrat…](https://drive.google.com/file/d/1nKnT8wG2OemdKivz_ukpw9Rnmc1LBF0mcv_YQdlqBEE)[Sup v8](https://drive.google.com/file/d/1CjeaEsNuDXxxeUMR58Eb4I2B_Cw6p_mhpspJdgqAQtE).
-        
+
 - **Shipment Cadence:**
-    - Defined by supplyDurationDays per product.
-    - Configurable by FM: Weekly, Monthly, or Flexible.
-    - Overrides require **reasonCode**, logged immutably
-        
+  - Defined by supplyDurationDays per product.
+  - Configurable by FM: Weekly, Monthly, or Flexible.
+  - Overrides require **reasonCode**, logged immutably
+
         [Objective: Seamlessly integrat…](https://drive.google.com/file/d/1nKnT8wG2OemdKivz_ukpw9Rnmc1LBF0mcv_YQdlqBEE).
-        
 
 ---
 
@@ -464,9 +463,9 @@ SupplySync ERP follows a **secure, modular, cloud-native architecture** that sup
     - **UserService**: Roles, RBAC, assignments.
     - **NotificationService**: Email, SMS, in-app alerts.
     - **AnalyticsService**: KPIs, anomaly detection, forecasting transparency
-        
+
         [Objective: Seamlessly integrat…](https://drive.google.com/file/d/1nKnT8wG2OemdKivz_ukpw9Rnmc1LBF0mcv_YQdlqBEE)[Supply Version 9.1.0](https://drive.google.com/file/d/16sUD0p5Kzk4kv0bg_5chbPK_xfinfX0BiyFs5KfTkPQ).
-        
+
 4. **Event Bus**
     - Asynchronous workflows via **Amazon EventBridge or AWS SNS/SQS**.
     - Example: OrderApproved event → triggers Notification + Inventory updates.
@@ -532,16 +531,16 @@ Rollback uses **Terraform state reversion + pre-migration DB snapshot restore**
 ## **4.5 Analytics & Audit Modules**
 
 - **AnalyticsService**
-    - Forecast transparency: Forecast = Baseline × Seasonal × Tier.
-    - KPIs: Variance Rate, Anomaly Frequency, Receipt Timeliness.
-    - Export: CSV download & scheduled compliance email reports
-        
+  - Forecast transparency: Forecast = Baseline × Seasonal × Tier.
+  - KPIs: Variance Rate, Anomaly Frequency, Receipt Timeliness.
+  - Export: CSV download & scheduled compliance email reports
+
         [Objective: Seamlessly integrat…](https://drive.google.com/file/d/1nKnT8wG2OemdKivz_ukpw9Rnmc1LBF0mcv_YQdlqBEE).
-        
+
 - **Audit Dashboard (Admin Only)**
-    - Search by actorUserId, targetEntityId, actionType.
-    - Filters: date range, role, event type.
-    - Drill-down into **changeSet** for each action.
+  - Search by actorUserId, targetEntityId, actionType.
+  - Filters: date range, role, event type.
+  - Drill-down into **changeSet** for each action.
 
 ---
 
@@ -1078,63 +1077,63 @@ Immutable log entry.
 ## **6.1 Authentication & Authorization**
 
 - **Authentication**
-    - All access federated via **OIDC/SSO** with enterprise IdP (e.g., Okta, Azure AD).
-    - AWS Cognito acts as broker, issues **short-lived JWTs** (no persistent credentials).
-    - MFA required for Admin elevation.
+  - All access federated via **OIDC/SSO** with enterprise IdP (e.g., Okta, Azure AD).
+  - AWS Cognito acts as broker, issues **short-lived JWTs** (no persistent credentials).
+  - MFA required for Admin elevation.
 - **Authorization (RBAC)**
-    - Enforced at **two layers**:
+  - Enforced at **two layers**:
         1. **Edge (API Gateway / Lambda Authorizer):** Validates JWT, extracts role & assignment, rejects unauthorized requests with 403 Forbidden.
         2. **Service Layer:** Services perform fine-grained checks (e.g., SM may only order for their storeId).
-    - Roles: SM, DM, FM, Cost Analyst, Admin, AI Agent (see Role Matrix).
+  - Roles: SM, DM, FM, Cost Analyst, Admin, AI Agent (see Role Matrix).
 
 ---
 
 ## **6.2 Data Security & Privacy**
 
 - **Encryption**
-    - TLS 1.2+ for all transport.
-    - AES-256 at rest (KMS keys for RDS, S3, OpenSearch).
+  - TLS 1.2+ for all transport.
+  - AES-256 at rest (KMS keys for RDS, S3, OpenSearch).
 - **Least Privilege**
-    - Cost fields visible only to FM, Cost Analyst, Admin.
-    - SM/DM APIs strip sensitive pricing data.
+  - Cost fields visible only to FM, Cost Analyst, Admin.
+  - SM/DM APIs strip sensitive pricing data.
 - **Asset Protection**
-    - Product images and variance photos stored in **private S3 buckets**.
-    - Access only via **pre-signed, time-limited URLs**.
+  - Product images and variance photos stored in **private S3 buckets**.
+  - Access only via **pre-signed, time-limited URLs**.
 - **PII Policy**
-    - Minimal PII stored (user name, work email).
-    - Managed and protected under corporate IdP’s controls.
+  - Minimal PII stored (user name, work email).
+  - Managed and protected under corporate IdP’s controls.
 
 ---
 
 ## **6.3 Audit & Compliance**
 
 - **Immutable Audit Trail**
-    - Every workflow action (create, approve, reject, override, receive, variance) logged with:
-        - userId, role, timestamp, actionType, reasonCode (if required).
-    - Audit logs append-only; never mutable or deletable.
+  - Every workflow action (create, approve, reject, override, receive, variance) logged with:
+    - userId, role, timestamp, actionType, reasonCode (if required).
+  - Audit logs append-only; never mutable or deletable.
 - **Audit Dashboard (Admin)**
-    - Search by actorUserId, targetEntityId, actionType.
-    - Filter by role, action, or timeframe.
-    - Drill-down into **changeSet** JSON.
-    - Export CSV or schedule compliance reports.
+  - Search by actorUserId, targetEntityId, actionType.
+  - Filter by role, action, or timeframe.
+  - Drill-down into **changeSet** JSON.
+  - Export CSV or schedule compliance reports.
 - **Quarterly Access Reviews**
-    - Automated report of all active users and roles.
-    - Admin + Compliance officer validation required.
+  - Automated report of all active users and roles.
+  - Admin + Compliance officer validation required.
 
 ---
 
 ## **6.4 Governance Policies**
 
 - **Approval Chain Governance**
-    - SM → DM → FM enforced for restricted or ad-hoc requests.
-    - FM overrides logged with **mandatory reasonCode**.
+  - SM → DM → FM enforced for restricted or ad-hoc requests.
+  - FM overrides logged with **mandatory reasonCode**.
 - **Admin Guardrails**
-    - High-privilege changes (RBAC, workflows, tolerances) require **MFA re-authentication**.
-    - Dual-control workflow (planned) for destructive ops (e.g., archived data deletion).
+  - High-privilege changes (RBAC, workflows, tolerances) require **MFA re-authentication**.
+  - Dual-control workflow (planned) for destructive ops (e.g., archived data deletion).
 - **Compliance Readiness**
-    - System is **audit-ready by design**.
-    - Full support for **SOX, GDPR, and internal corporate audit standards**.
-    - Logs retained indefinitely in AWS Glacier for regulatory traceability.
+  - System is **audit-ready by design**.
+  - Full support for **SOX, GDPR, and internal corporate audit standards**.
+  - Logs retained indefinitely in AWS Glacier for regulatory traceability.
 
 ---
 
@@ -1300,9 +1299,8 @@ Late delivery detection for Cost Analyst & FM alerting.
 - **Ops:** API p95 latency, error rate, ServiceError counts, queue lag.
 - **Business:** Approvals per day, DM timeout escalations, variance rate, SLA breach count, receipt timeliness, anomaly frequency.
 - **Security:** Login failures, privileged actions, audit export jobs.
-    
+
     Export CSV and scheduled email reports for compliance (DM/FM/Analyst roles).
-    
 
 ---
 
@@ -1310,9 +1308,9 @@ Late delivery detection for Cost Analyst & FM alerting.
 
 - Lint events against **JSON Schemas** below.
 - Block deploy if:
-    - Required fields missing or invalid enum.
-    - New event types not registered in taxonomy.
-    - A11y/perf budgets violated in telemetry-labeled Lighthouse runs (cross-link with Section 8).
+  - Required fields missing or invalid enum.
+  - New event types not registered in taxonomy.
+  - A11y/perf budgets violated in telemetry-labeled Lighthouse runs (cross-link with Section 8).
 
 ---
 
@@ -1322,7 +1320,7 @@ Late delivery detection for Cost Analyst & FM alerting.
 
 {
 
-"$id": "https://supplysync/schemas/telemetry/envelope.json",
+"$id": "<https://supplysync/schemas/telemetry/envelope.json>",
 
 "type": "object",
 
@@ -1370,7 +1368,7 @@ Late delivery detection for Cost Analyst & FM alerting.
 
 {
 
-"$id": "https://supplysync/schemas/telemetry/order-approved.json",
+"$id": "<https://supplysync/schemas/telemetry/order-approved.json>",
 
 "type": "object",
 
@@ -1492,9 +1490,8 @@ return s
 
 - Every business event references the **canonical IDs** from Section 5 (Orders, Users, Stores, Products) to ensure joinability in Athena/warehouse.
 - Forecast transparency displayed in Analytics UI must be reproducible from logged inputs:
-    
+
     Forecast = Baseline Usage × Seasonal Multiplier × Store Tier Multiplier.
-    
 
 ---
 
@@ -1509,22 +1506,22 @@ SupplySync ERP must comply with **WCAG 2.1 Level AA**. Accessibility is treated 
 **Core Requirements:**
 
 - **Keyboard Navigability:**
-    
+
     All interactive elements (buttons, links, form fields, menus) must be operable via keyboard. No workflow should require a mouse.
-    
+
 - **Screen Reader Support:**
-    - Use semantic HTML5 (<nav>, <main>, <button>, <form>, etc.).
-    - ARIA attributes applied only where necessary.
-    - Dialogs, modals, and alerts must announce state changes.
+  - Use semantic HTML5 (<nav>, <main>, <button>, <form>, etc.).
+  - ARIA attributes applied only where necessary.
+  - Dialogs, modals, and alerts must announce state changes.
 - **Color & Contrast:**
-    - Text and icons must meet **4.5:1 contrast ratio** minimum (3:1 for large text).
-    - No information may be conveyed by color alone (e.g., approval states must include icons/labels).
+  - Text and icons must meet **4.5:1 contrast ratio** minimum (3:1 for large text).
+  - No information may be conveyed by color alone (e.g., approval states must include icons/labels).
 - **Forms & Validation:**
-    - Inputs require programmatically associated labels.
-    - Errors must be clear, descriptive, and announced to assistive tech.
+  - Inputs require programmatically associated labels.
+  - Errors must be clear, descriptive, and announced to assistive tech.
 - **Localization:**
-    - All text must be translatable (i18n-ready).
-    - RTL layouts supported.
+  - All text must be translatable (i18n-ready).
+  - RTL layouts supported.
 
 ---
 
@@ -1548,14 +1545,14 @@ Performance targets are strict and **enforced via CI/CD gates**. Builds failing 
 ## **8.3 Enforcement & Testing**
 
 - **Automated CI/CD Gates:**
-    - **Lighthouse Audits**: Validate LCP, INP, CLS, best practices. Score <90 fails build.
-    - **Axe-Core Scans**: WCAG 2.1 checks; critical violations block deploy.
+  - **Lighthouse Audits**: Validate LCP, INP, CLS, best practices. Score <90 fails build.
+  - **Axe-Core Scans**: WCAG 2.1 checks; critical violations block deploy.
 - **Manual Accessibility Testing (Pre-release):**
-    - Screen readers: JAWS, NVDA, VoiceOver.
-    - Keyboard-only workflows validated for order creation, approval, variance handling.
+  - Screen readers: JAWS, NVDA, VoiceOver.
+  - Keyboard-only workflows validated for order creation, approval, variance handling.
 - **Production Monitoring (RUM):**
-    - Collect Core Web Vitals from real users.
-    - Alert thresholds: >10% of sessions violating budgets triggers incident review.
+  - Collect Core Web Vitals from real users.
+  - Alert thresholds: >10% of sessions violating budgets triggers incident review.
 
 ---
 
@@ -1572,17 +1569,17 @@ Performance targets are strict and **enforced via CI/CD gates**. Builds failing 
 The rollout follows a **phased deployment** to reduce operational risk.
 
 - **Phase 1 – Pilot Rollout**
-    - Scope: 1 district (~10 stores)
-    - Duration: 2 weeks
-    - Goal: Validate order workflows, approval chain, receiving variance handling
+  - Scope: 1 district (~10 stores)
+  - Duration: 2 weeks
+  - Goal: Validate order workflows, approval chain, receiving variance handling
 - **Phase 2 – Regional Expansion**
-    - Scope: All West-Coast districts
-    - Duration: 2 weeks
-    - Goal: Validate warehouse load balancing, direct-ship volume, SLA monitoring
+  - Scope: All West-Coast districts
+  - Duration: 2 weeks
+  - Goal: Validate warehouse load balancing, direct-ship volume, SLA monitoring
 - **Phase 3 – National Rollout**
-    - Scope: All districts
-    - Duration: 1 week
-    - Goal: Full adoption with enterprise-wide monitoring and anomaly detection
+  - Scope: All districts
+  - Duration: 1 week
+  - Goal: Full adoption with enterprise-wide monitoring and anomaly detection
 
 ---
 
@@ -1623,10 +1620,10 @@ The rollout follows a **phased deployment** to reduce operational risk.
 ## **9.4 Post-Migration Validation**
 
 - **Monitoring Window:** 72h heightened monitoring
-    - API latency
-    - Order approval SLA
-    - Variance workflow completion
-    - Vendor SLA breaches
+  - API latency
+  - Order approval SLA
+  - Variance workflow completion
+  - Vendor SLA breaches
 - **User Feedback:** Dedicated Slack/Helpdesk for SM/DM/FM
 - **Go/No-Go Checkpoint:** 48h after pilot; leadership decides continuation
 
@@ -1712,18 +1709,64 @@ Rollback is **last resort** (triggered by Severity 1 issues).
 ## **10.4 Continuous Validation in CI/CD**
 
 - **Automated Gates:**
-    - Unit tests ≥ 80% coverage (orders, approvals, receiving, invoices)
-    - Integration tests for SM→DM→FM flow, Direct-Ship, variance handling
-    - Performance budgets enforced (see Section 8)
-    - Accessibility scans enforced (see Section 8)
-    - Telemetry validation (Section 7 schemas)
+  - Unit tests ≥ 80% coverage (orders, approvals, receiving, invoices)
+  - Integration tests for SM→DM→FM flow, Direct-Ship, variance handling
+  - Performance budgets enforced (see Section 8)
+  - Accessibility scans enforced (see Section 8)
+  - Telemetry validation (Section 7 schemas)
 - **Staging Sign-off:**
-    - Smoke test: login, catalog search, restricted order approval, goods receipt
-    - Data integrity: migrated SKUs match expected mappings
+  - Smoke test: login, catalog search, restricted order approval, goods receipt
+  - Data integrity: migrated SKUs match expected mappings
 - **Quarterly Audit Tests:**
-    - FM override traceability
-    - Admin MFA elevation
-    - Access review export
+  - FM override traceability
+  - Admin MFA elevation
+  - Access review export
+
+## Contributor Guidelines & Development Standards
+
+### **Code Standards**
+
+- **Theme Preservation**: Never modify `theme.css`, `tailwind.config.js`, or `theme.json`
+- **Conventional Commits**: Use format `type(scope): description (Version 10.0.6)`
+- **Version References**: All commits must reference current version in footers
+- **Branch Strategy**: Commit directly to main branch unless explicitly requested otherwise
+
+### **Architecture Compliance**
+
+- **Framework Stack**: Vite + React + TypeScript with @github/spark integration
+- **Component Organization**: UI components in `src/components/ui/`, features in respective folders
+- **Import Standards**: Use `@/` aliases for `src/` directory references
+- **Type Safety**: Maintain TypeScript strict mode compliance throughout
+
+### **Development Workflow**
+
+- **Documentation First**: Reference this SupplySync Version 10.md for all project decisions
+- **Version Management**: VERSION file serves as single source of truth
+- **Environment Setup**: Run `npm run postinstall` to inject version into .env
+- **Quality Gates**: ESLint compliance required, markdownlint configured for docs
+
+### **Testing & Validation**
+
+- **Acceptance Tests**: Follow AT-1 through AT-28 specifications
+- **Error Handling**: Include proper error boundaries and user feedback
+- **Accessibility**: Maintain ARIA compliance and keyboard navigation
+- **Performance**: Consider component lazy loading and bundle optimization
+
+### **Security & Governance**
+
+- **Role-Based Access**: Implement according to established SM→DM→FM hierarchy
+- **Audit Compliance**: All changes must support immutable audit trail requirements  
+- **Data Validation**: Follow Master Schemas exactly as specified in sections 5.x
+- **API Standards**: RESTful endpoints with proper error handling and telemetry
+
+### **Homer Guardrails**
+
+GitHub Copilot is configured via `.github/COPILOT_INSTRUCTIONS.md` to enforce:
+
+- Direct main branch commits (no unauthorized branching)
+- Version 10.0.6 references in all commit messages
+- Theme preservation and component pattern adherence
+- Project documentation alignment with this specification
 
 ## Release Notes & Changelog
 
@@ -1736,33 +1779,33 @@ Rollback is **last resort** (triggered by Severity 1 issues).
 ### **New Features & Enhancements**
 
 - **Functional Substitution:**
-    - Introduced needType and equivalentUnit in Product schema.
-    - Enables AI/FM substitution for lowest landed cost across equivalent SKUs.
+  - Introduced needType and equivalentUnit in Product schema.
+  - Enables AI/FM substitution for lowest landed cost across equivalent SKUs.
 - **UPC Alias Handling:**
-    - Receiving workflow updated for *new barcode detection*.
-    - SM confirms → FM approves → Alias persisted in Product schema.
+  - Receiving workflow updated for *new barcode detection*.
+  - SM confirms → FM approves → Alias persisted in Product schema.
 - **Replenishment Cadence:**
-    - supplyDurationDays field supports Weekly, Monthly, Flexible cadences.
-    - FM overrides require reasonCode.
+  - supplyDurationDays field supports Weekly, Monthly, Flexible cadences.
+  - FM overrides require reasonCode.
 - **Direct-Ship Clarification:**
-    - Confirmed fulfillmentMethod field supports both WAREHOUSE_DEFAULT and DIRECT_SHIP.
-    - Amazon/vendor orders configurable at FM approval step.
+  - Confirmed fulfillmentMethod field supports both WAREHOUSE_DEFAULT and DIRECT_SHIP.
+  - Amazon/vendor orders configurable at FM approval step.
 - **Storefront Catalog UX:**
-    - Authentication required.
-    - Search, filters, categories available.
-    - Restricted items show “Request Approval” button instead of Add-to-Cart.
+  - Authentication required.
+  - Search, filters, categories available.
+  - Restricted items show “Request Approval” button instead of Add-to-Cart.
 - **Analytics & KPIs Expansion:**
-    - Forecasts displayed as:
-        
+  - Forecasts displayed as:
+
         Forecast = Baseline Usage × Seasonal Multiplier × Store Tier Multiplier
-        
-    - Added Store Quality Metrics: Variance Rate, Anomaly Frequency, Receipt Timeliness.
-    - CSV + scheduled email exports supported.
+
+  - Added Store Quality Metrics: Variance Rate, Anomaly Frequency, Receipt Timeliness.
+  - CSV + scheduled email exports supported.
 - **Audit Dashboard:**
-    - Admin-facing UI with search, filters, drill-down into changeSets.
-    - Supports compliance exports.
+  - Admin-facing UI with search, filters, drill-down into changeSets.
+  - Supports compliance exports.
 - **Acceptance Tests AT-23 → AT-28:**
-    - Cover UPC alias handling, substitution, restricted catalog items, analytics exports, and audit dashboard.
+  - Cover UPC alias handling, substitution, restricted catalog items, analytics exports, and audit dashboard.
 
 ### **Fixes & Clarifications**
 
@@ -1795,12 +1838,12 @@ Rollback is **last resort** (triggered by Severity 1 issues).
 
 - **v8.0.0**: Established canonical SM→DM→FM approval chain, baseline schemas, IaC model.
 - **v8.1**:
-    - Added Storefront catalog UX specs.
-    - Receiving workflows: case-scan, barcode alias approval.
-    - Transit load balancing + AllotmentRequest schema.
-    - KPIs: Cost-to-Serve, SLA%, Stockout-Risk.
+  - Added Storefront catalog UX specs.
+  - Receiving workflows: case-scan, barcode alias approval.
+  - Transit load balancing + AllotmentRequest schema.
+  - KPIs: Cost-to-Serve, SLA%, Stockout-Risk.
 - **v8.2 (Proposed):**
-    - Store directory & profile UI.
-    - Role-aware navigation tree.
-    - Store Quality Metrics dashboards.
-    - Acceptance Tests AT-19 → AT-22.
+  - Store directory & profile UI.
+  - Role-aware navigation tree.
+  - Store Quality Metrics dashboards.
+  - Acceptance Tests AT-19 → AT-22.

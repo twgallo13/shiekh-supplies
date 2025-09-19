@@ -16,6 +16,7 @@ import { AuditDashboard } from '@/components/audit/AuditDashboard'
 import { PermissionsSummary } from '@/components/admin/PermissionsSummary'
 import { ComponentsDemo } from '@/components/ui/components-demo'
 import { Toaster } from '@/components/ui/sonner'
+import { AppVersion } from '@/components/ui/app-version'
 import { getCurrentUser, canAccessView, UserRole } from '@/lib/auth'
 import { toast } from 'sonner'
 import type { Order } from '@/types/orders'
@@ -251,6 +252,9 @@ function App() {
 
       {/* Toast notifications */}
       <Toaster />
+
+      {/* App Version */}
+      <AppVersion />
     </div>
   )
 }
