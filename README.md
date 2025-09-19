@@ -34,7 +34,7 @@ This document contains:
 - Acceptance testing requirements
 - Development guidelines and standards
 
-## 📄 License For Spark Template ResourcesYou've just launched your brand-new Spark Template Codespace — everything's fired up and ready for you to explore, build, and create with Spark!
+## 📄 License For Spark Template ResourcesYou've just launched your brand-new Spark Template Codespace — everything's fired up and ready for you to explore, build, and create with Spark
 
 This template is your blank canvas. It comes with a minimal setup to help you get started quickly with Spark development.
 
