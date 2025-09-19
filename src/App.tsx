@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useMatch } from 'react-router-dom'
 import { useKV } from '@github/spark/hooks'
 import { LoginScreen } from './components/auth/LoginScreen'
 import { Dashboard } from './components/Dashboard'
 import { Header } from './components/layout/Header'
 import { Sidebar } from './components/layout/Sidebar'
 import { Catalog } from './components/catalog/Catalog'
+import { ProductDetailsPage } from '@/components/catalog/ProductDetails'
 import { CartSheet } from './components/cart/CartSheet'
 import { OrdersView } from '@/components/orders/OrdersView'
 import { GoodsReceiptView } from '@/components/orders/GoodsReceiptView'
@@ -29,6 +31,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedOrderForReceiving, setSelectedOrderForReceiving] = useState<Order | null>(null)
   const [selectedOrderForVarianceResolution, setSelectedOrderForVarianceResolution] = useState<Order | null>(null)
+  const productMatch = useMatch('/product/:productId')
 
   useEffect(() => {
     const initializeUser = async () => {
@@ -78,14 +81,16 @@ function App() {
         fullName: 'Elena Rodriguez',
         email: 'elena.rodriguez@supplysync.com',
         role: 'FM' as UserRole,
-        assignment: { type: 'region' as const, id: 'region-west', name: 'Western Region' }
+        assignment: { type: 'region' as const, id: 'region-west', name: 'Western Region' },
+        permissions: ['manageProducts', 'viewCatalog']
       },
       'ADMIN': {
         userId: 'demo-admin-1',
         fullName: 'David Kim',
         email: 'david.kim@supplysync.com',
         role: 'ADMIN' as UserRole,
-        assignment: { type: 'system' as const, id: 'system', name: 'System Wide' }
+        assignment: { type: 'system' as const, id: 'system', name: 'System Wide' },
+        permissions: ['manageProducts', 'viewCatalog']
       },
       'COST_ANALYST': {
         userId: 'demo-analyst-1',
@@ -241,7 +246,14 @@ function App() {
             onRoleSwitch={handleRoleSwitch}
           />
           <main className="p-6">
-            {renderView()}
+            {productMatch ? (
+              <ProductDetailsPage
+                productId={(productMatch.params as { productId?: string }).productId ?? ''}
+                onBackToCatalog={() => { window.location.hash = "#/catalog" }}
+              />
+            ) : (
+              renderView()
+            )}
           </main>
         </div>
       </div>
