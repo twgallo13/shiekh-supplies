@@ -1,11 +1,13 @@
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
 import { useCartStore } from '@/stores/cart-store'
+import { pdpTelemetry } from '@/lib/telemetry'
+import type { User } from '@/lib/auth'
 
 interface Product {
     productId: string
@@ -34,6 +36,7 @@ interface ProductDetailsPageProps {
 
 export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetailsPageProps) => {
     const [products] = useKV<Product[]>('products', [])
+    const [currentUser] = useKV<User | null>('current_user', null)
     const addItem = useCartStore((state) => state.addItem)
     const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
 
@@ -73,6 +76,24 @@ export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetail
         return variant || baseProduct
     }, [baseProduct, selectedVariantId, allVariants])
 
+    // Emit view_product telemetry on mount
+    useEffect(() => {
+        if (baseProduct) {
+            pdpTelemetry.viewProduct(
+                {
+                    productId: baseProduct.productId,
+                    sku: baseProduct.sku,
+                    category: baseProduct.category
+                },
+                currentUser ? {
+                    userId: currentUser.userId,
+                    userRole: currentUser.role,
+                    clientIp: null // Not available in frontend context
+                } : undefined
+            )
+        }
+    }, [baseProduct, currentUser])
+
     if (!baseProduct || !product) {
         return (
             <div className="text-center">
@@ -93,6 +114,21 @@ export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetail
             isRestricted: product.isRestricted,
             costPerUnit: product.costPerUnit
         })
+
+        // Emit add_to_cart telemetry
+        pdpTelemetry.addToCart(
+            {
+                productId: product.productId,
+                sku: product.sku,
+                qty: 1
+            },
+            currentUser ? {
+                userId: currentUser.userId,
+                userRole: currentUser.role,
+                clientIp: null
+            } : undefined
+        )
+
         toast.success(`${product.productName} added to cart.`)
     }
 
@@ -105,6 +141,21 @@ export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetail
             isRestricted: product.isRestricted,
             costPerUnit: product.costPerUnit
         })
+
+        // Emit add_to_cart telemetry (same event for restricted items)
+        pdpTelemetry.addToCart(
+            {
+                productId: product.productId,
+                sku: product.sku,
+                qty: 1
+            },
+            currentUser ? {
+                userId: currentUser.userId,
+                userRole: currentUser.role,
+                clientIp: null
+            } : undefined
+        )
+
         toast.info(`${product.productName} added to cart for approval.`)
     }
 
