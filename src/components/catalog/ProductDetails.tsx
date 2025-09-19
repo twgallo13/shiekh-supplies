@@ -1,5 +1,5 @@
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -13,6 +13,8 @@ interface Product {
     productName: string
     description: string
     category: string
+    needType?: string
+    equivalentUnit?: string
     unitOfMeasure: string
     itemsPerUnit?: number
     imageUrl?: string
@@ -22,6 +24,7 @@ interface Product {
     supplyDurationDays?: number
     vendorSkuMap?: Record<string, string>
     barcodeAliases?: string[]
+    variants?: Product[]
 }
 
 interface ProductDetailsPageProps {
@@ -32,12 +35,45 @@ interface ProductDetailsPageProps {
 export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetailsPageProps) => {
     const [products] = useKV<Product[]>('products', [])
     const addItem = useCartStore((state) => state.addItem)
+    const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
 
-    const product = useMemo(() => {
+    const baseProduct = useMemo(() => {
         return products?.find((p) => p.productId === productId)
     }, [products, productId])
 
-    if (!product) {
+    // Find functional substitution candidates based on needType + equivalentUnit
+    const functionalSubstitutes = useMemo(() => {
+        if (!baseProduct?.needType || !baseProduct?.equivalentUnit) return []
+
+        return (products || []).filter(p =>
+            p.productId !== baseProduct.productId &&
+            p.needType === baseProduct.needType &&
+            p.equivalentUnit === baseProduct.equivalentUnit
+        )
+    }, [products, baseProduct])
+
+    // Combine explicit variants with functional substitutes
+    const allVariants = useMemo(() => {
+        const variants = baseProduct?.variants || []
+        const substitutes = functionalSubstitutes
+
+        // Deduplicate by productId
+        const seen = new Set(variants.map(v => v.productId))
+        const uniqueSubstitutes = substitutes.filter(s => !seen.has(s.productId))
+
+        return [...variants, ...uniqueSubstitutes]
+    }, [baseProduct?.variants, functionalSubstitutes])
+
+    // The currently displayed product (base or selected variant)
+    const product = useMemo(() => {
+        if (!baseProduct) return null
+        if (!selectedVariantId) return baseProduct
+
+        const variant = allVariants.find(v => v.productId === selectedVariantId)
+        return variant || baseProduct
+    }, [baseProduct, selectedVariantId, allVariants])
+
+    if (!baseProduct || !product) {
         return (
             <div className="text-center">
                 <p>Product not found.</p>
@@ -185,6 +221,54 @@ export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetail
                                 )}
                             </div>
                         </div>
+
+                        {/* Variants & Substitutes */}
+                        {allVariants.length > 0 && (
+                            <div className="space-y-3">
+                                <div className="text-sm text-muted-foreground">
+                                    {baseProduct.variants?.length ? 'Variants' : 'Functional Substitutes'}
+                                    {baseProduct.needType && baseProduct.equivalentUnit && (
+                                        <span className="ml-2 text-xs">
+                                            ({baseProduct.needType} • {baseProduct.equivalentUnit})
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="grid grid-cols-1 gap-2">
+                                    {/* Current selection */}
+                                    <Button
+                                        variant={!selectedVariantId ? "default" : "outline"}
+                                        size="sm"
+                                        onClick={() => setSelectedVariantId(null)}
+                                        className="justify-start text-left h-auto p-3"
+                                    >
+                                        <div className="flex flex-col items-start">
+                                            <div className="font-medium">{baseProduct.productName}</div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {baseProduct.sku} • {formatCurrency(baseProduct.costPerUnit) || 'Price not available'}
+                                            </div>
+                                        </div>
+                                    </Button>
+
+                                    {/* Variants/Substitutes */}
+                                    {allVariants.map((variant) => (
+                                        <Button
+                                            key={variant.productId}
+                                            variant={selectedVariantId === variant.productId ? "default" : "outline"}
+                                            size="sm"
+                                            onClick={() => setSelectedVariantId(variant.productId)}
+                                            className="justify-start text-left h-auto p-3"
+                                        >
+                                            <div className="flex flex-col items-start">
+                                                <div className="font-medium">{variant.productName}</div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {variant.sku} • {formatCurrency(variant.costPerUnit) || 'Price not available'}
+                                                </div>
+                                            </div>
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Inventory stub */}
                         <div className="rounded-md border p-3 text-sm text-muted-foreground">
