@@ -31,11 +31,11 @@ try {
     // .env doesn't exist, will create new
 }
 
-// Remove existing APP_VERSION line and add new one
-const envLines = envContent.split('\n').filter(line => !line.startsWith('APP_VERSION='))
-envLines.push(`APP_VERSION=${version}`)
+// Remove existing VITE_APP_VERSION line and add new one
+const envLines = envContent.split('\n').filter(line => !line.startsWith('VITE_APP_VERSION='))
+envLines.push(`VITE_APP_VERSION=${version}`)
 
 // Write updated .env
 fs.writeFileSync(envPath, envLines.join('\n'))
 
-console.log(`✅ Injected APP_VERSION=${version} into .env`)
+console.log(`✅ Injected VITE_APP_VERSION=${version} into .env`)
