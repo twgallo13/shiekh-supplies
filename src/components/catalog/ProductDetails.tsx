@@ -39,6 +39,7 @@ export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetail
     const [currentUser] = useKV<User | null>('current_user', null)
     const addItem = useCartStore((state) => state.addItem)
     const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
+    const [announceText, setAnnounceText] = useState<string>('')
 
     const baseProduct = useMemo(() => {
         return products?.find((p) => p.productId === productId)
@@ -169,18 +170,30 @@ export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetail
 
     return (
         <div>
-            <Button onClick={onBackToCatalog} variant="outline" className="mb-4">
+            {/* Screen reader announcements for variant/price changes */}
+            <div aria-live="polite" aria-atomic="true" className="sr-only">
+                {announceText}
+            </div>
+
+            <Button
+                onClick={onBackToCatalog}
+                variant="outline"
+                className="mb-4"
+                aria-label="Go back to product catalog"
+            >
                 &larr; Back to Catalog
             </Button>
             <Card>
                 <CardHeader>
                     <div className="flex items-start justify-between gap-4">
                         <div>
-                            <CardTitle className="text-2xl">{product.productName}</CardTitle>
+                            <CardTitle className="text-2xl" id="product-title">{product.productName}</CardTitle>
                             <div className="mt-2 flex items-center gap-2">
-                                <Badge>{product.category}</Badge>
+                                <Badge aria-label={`Category: ${product.category}`}>{product.category}</Badge>
                                 {product.isRestricted && (
-                                    <Badge variant="destructive">Restricted</Badge>
+                                    <Badge variant="destructive" aria-label="This item is restricted and requires approval">
+                                        Restricted
+                                    </Badge>
                                 )}
                             </div>
                         </div>
@@ -195,18 +208,23 @@ export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetail
                         {product.imageUrl ? (
                             <img
                                 src={product.imageUrl}
-                                alt={product.productName}
+                                alt={`Product image for ${product.productName}`}
                                 className="mb-4 aspect-square w-full max-w-md rounded-lg object-cover"
+                                role="img"
                             />
                         ) : (
-                            <div className="mb-4 aspect-square w-full max-w-md rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+                            <div
+                                className="mb-4 aspect-square w-full max-w-md rounded-lg bg-muted flex items-center justify-center text-muted-foreground"
+                                role="img"
+                                aria-label={`No image available for ${product.productName}`}
+                            >
                                 No image available
                             </div>
                         )}
                     </div>
 
                     {/* Details */}
-                    <div className="space-y-4">
+                    <div className="space-y-4" role="main" aria-labelledby="product-title">
                         <p className="text-base text-muted-foreground">{product.description || 'No description provided.'}</p>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -276,7 +294,7 @@ export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetail
                         {/* Variants & Substitutes */}
                         {allVariants.length > 0 && (
                             <div className="space-y-3">
-                                <div className="text-sm text-muted-foreground">
+                                <div className="text-sm text-muted-foreground" id="variants-label">
                                     {baseProduct.variants?.length ? 'Variants' : 'Functional Substitutes'}
                                     {baseProduct.needType && baseProduct.equivalentUnit && (
                                         <span className="ml-2 text-xs">
@@ -284,17 +302,33 @@ export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetail
                                         </span>
                                     )}
                                 </div>
-                                <div className="grid grid-cols-1 gap-2">
+                                <div
+                                    className="grid grid-cols-1 gap-2"
+                                    role="radiogroup"
+                                    aria-labelledby="variants-label"
+                                    aria-describedby="variant-help"
+                                >
+                                    <div id="variant-help" className="sr-only">
+                                        Use arrow keys to navigate between variants. Press Enter or Space to select a variant.
+                                    </div>
+
                                     {/* Current selection */}
                                     <Button
                                         variant={!selectedVariantId ? "default" : "outline"}
                                         size="sm"
-                                        onClick={() => setSelectedVariantId(null)}
+                                        onClick={() => {
+                                            setSelectedVariantId(null)
+                                            setAnnounceText(`Selected ${baseProduct.productName} at ${formatCurrency(baseProduct.costPerUnit) || 'price not available'}`)
+                                        }}
                                         className="justify-start text-left h-auto p-3"
+                                        role="radio"
+                                        aria-checked={!selectedVariantId}
+                                        aria-describedby={`variant-${baseProduct.productId}-details`}
+                                        tabIndex={!selectedVariantId ? 0 : -1}
                                     >
                                         <div className="flex flex-col items-start">
                                             <div className="font-medium">{baseProduct.productName}</div>
-                                            <div className="text-xs text-muted-foreground">
+                                            <div className="text-xs text-muted-foreground" id={`variant-${baseProduct.productId}-details`}>
                                                 {baseProduct.sku} • {formatCurrency(baseProduct.costPerUnit) || 'Price not available'}
                                             </div>
                                         </div>
@@ -306,12 +340,19 @@ export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetail
                                             key={variant.productId}
                                             variant={selectedVariantId === variant.productId ? "default" : "outline"}
                                             size="sm"
-                                            onClick={() => setSelectedVariantId(variant.productId)}
+                                            onClick={() => {
+                                                setSelectedVariantId(variant.productId)
+                                                setAnnounceText(`Selected ${variant.productName} at ${formatCurrency(variant.costPerUnit) || 'price not available'}`)
+                                            }}
                                             className="justify-start text-left h-auto p-3"
+                                            role="radio"
+                                            aria-checked={selectedVariantId === variant.productId}
+                                            aria-describedby={`variant-${variant.productId}-details`}
+                                            tabIndex={selectedVariantId === variant.productId ? 0 : -1}
                                         >
                                             <div className="flex flex-col items-start">
                                                 <div className="font-medium">{variant.productName}</div>
-                                                <div className="text-xs text-muted-foreground">
+                                                <div className="text-xs text-muted-foreground" id={`variant-${variant.productId}-details`}>
                                                     {variant.sku} • {formatCurrency(variant.costPerUnit) || 'Price not available'}
                                                 </div>
                                             </div>
@@ -329,14 +370,28 @@ export const ProductDetailsPage = ({ productId, onBackToCatalog }: ProductDetail
                         {/* CTAs */}
                         <div className="pt-2">
                             {product.isRestricted ? (
-                                <Button size="lg" onClick={handleRequestApproval}>
+                                <Button
+                                    size="lg"
+                                    onClick={handleRequestApproval}
+                                    aria-describedby="restricted-help"
+                                >
                                     Request Approval
                                 </Button>
                             ) : (
-                                <Button size="lg" onClick={handleAddToCart}>
+                                <Button
+                                    size="lg"
+                                    onClick={handleAddToCart}
+                                    aria-describedby="addtocart-help"
+                                >
                                     Add to Cart
                                 </Button>
                             )}
+                            <div id="restricted-help" className="sr-only">
+                                This item requires approval before it can be ordered
+                            </div>
+                            <div id="addtocart-help" className="sr-only">
+                                Add one unit of this item to your shopping cart
+                            </div>
                         </div>
                     </div>
                 </CardContent>
