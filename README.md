@@ -21,6 +21,18 @@ No problem! If you were just checking things out and don't need to keep this cod
 - Simply delete your Spark.
 - Everything will be cleaned up — no traces left behind.
 
-## 📄 License For Spark Template Resources
+## � Release Notes (v10.0.7)
+
+For comprehensive project documentation, specifications, and requirements, see [SupplySync Version 10.md](./SupplySync%20Version%2010.md).
+
+This document contains:
+
+- Complete system architecture and workflows
+- Role-based access control specifications
+- API schemas and telemetry contracts
+- Acceptance testing requirements
+- Development guidelines and standards
+
+## �📄 License For Spark Template Resources
 
 The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
