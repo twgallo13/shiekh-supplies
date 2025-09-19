@@ -3,9 +3,12 @@
     "MD025": {
         "front_matter_title": ""
     },
+    "MD033": false,
     "MD034": true,
     "MD046": true,
     "MD051": true,
     "MD022": true,
-    "MD009": true
+    "MD009": true,
+    "MD024": false,
+    "MD036": false
 }
