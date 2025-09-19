@@ -1,20 +1,26 @@
-# SupplySync Version 10
+# SupplySync Version 10.0.6
 
-# **1. Project Overview & Strategic Goals**
+## Changelog (10.0.6)
+
+- Repo-wide markdown cleanup (lint passes)
+- Add non-intrusive UI version display
+- Lock Homer to commit on main only (project guardrails)
+
+## Project Overview & Strategic Goals
 
 > Table of contents
-> 
-- [1. Project Overview & Strategic Goals](#-1-project-overview--strategic-goals)
-- [2. Role Matrix & Use Cases](#-2-role-matrix--use-cases)
-- [3. Core Workflows & Escalation Paths](#-3-core-workflows--escalation-paths)
-- [4. Technical Architecture & Deployment](#-4-technical-architecture--deployment)
-- [5. Master Schemas](#-5-master-schemas)
-- [6. Security, Governance, and Compliance](#-6-security-governance-and-compliance)
-- [7. Telemetry & Logging Contract](#-7-telemetry--logging-contract)
-- [8. Accessibility & Performance Budgets](#-8-accessibility--performance-budgets)
-- [9. Migration & Rollback Plan](#-9-migration--rollback-plan)
-- [10. Acceptance Tests & Validation Rules](#-10-acceptance-tests--validation-rules)
-- [11. Release Notes & Changelog](#-11-release-notes--changelog)
+
+- [Project Overview & Strategic Goals](#project-overview--strategic-goals)
+- [Role Matrix & Use Cases](#role-matrix--use-cases)
+- [Core Workflows & Escalation Paths](#core-workflows--escalation-paths)
+- [Technical Architecture & Deployment](#technical-architecture--deployment)
+- [Master Schemas](#master-schemas)
+- [Security, Governance, and Compliance](#security-governance-and-compliance)
+- [Telemetry & Logging Contract](#telemetry--logging-contract)
+- [Accessibility & Performance Budgets](#accessibility--performance-budgets)
+- [Migration & Rollback Plan](#migration--rollback-plan)
+- [Acceptance Tests & Validation Rules](#acceptance-tests--validation-rules)
+- [Release Notes & Changelog](#release-notes--changelog)
 
 <aside>
 🧩
@@ -87,9 +93,10 @@ The platform is governed by five **core strategic goals**:
     - **SSO/OIDC authentication**, short-lived JWT sessions, and signed URLs for assets.
     - Strict **PII minimization**: user identity limited to name and work email.
     - All data encrypted **in transit (TLS 1.2+)** and **at rest (AES-256)**
-        
-        [Supply Version 9.1.0](https://drive.google.com/file/d/16sUD0p5Kzk4kv0bg_5chbPK_xfinfX0BiyFs5KfTkPQ)[Sup v8](https://drive.google.com/file/d/1CjeaEsNuDXxxeUMR58Eb4I2B_Cw6p_mhpspJdgqAQtE)**2. Role Matrix & Use Cases**
-        
+
+---
+
+## Role Matrix & Use Cases
 
 ## **2.1 Role Matrix**
 
@@ -200,7 +207,7 @@ This matrix defines the scope, responsibilities, and system permissions for each
 
 - .
 
-# **3. Core Workflows & Escalation Paths**
+## Core Workflows & Escalation Paths
 
 ## **3.1 Order Lifecycle States**
 
@@ -427,7 +434,7 @@ curl -X POST "$API_BASE/api/v1/products/9b0c6c6c-2b7f-4ff8-9a37-6e7d3e2eaa11/ali
 - **UPC alias handling**, **direct-ship approval rules**, and **functional substitution** are integrated.
 - Escalation table unified with clear triggers, actions, and recipients.
 
-# **4. Technical Architecture & Deployment**
+## Technical Architecture & Deployment
 
 ## **4.1 High-Level Architecture**
 
@@ -546,7 +553,7 @@ Rollback uses **Terraform state reversion + pre-migration DB snapshot restore**
 
 ---
 
-# **5. Master Schemas**
+## Master Schemas
 
 All schemas are defined in **JSON-like canonical format**. These serve as contracts for:
 
@@ -1066,7 +1073,7 @@ Immutable log entry.
 - Integrated **functional substitution**, **UPC alias handling**, and **allotment request logic**.
 - Free of duplication and drift — dev-ready for API + DB implementation.
 
-# **6. Security, Governance, and Compliance**
+## Security, Governance, and Compliance
 
 ## **6.1 Authentication & Authorization**
 
@@ -1139,7 +1146,7 @@ Immutable log entry.
 
 ---
 
-# **7. Telemetry & Logging Contract**
+## Telemetry & Logging Contract
 
 ## **7.1 Event Envelope (Canonical)**
 
@@ -1493,7 +1500,7 @@ return s
 
 **Traceability to sources:** Standard event envelope & key events (9.1.0); analytics exports, KPIs, and explainable forecasts (9.1.1); JSON-structured logging, S3/Athena lake, telemetry taxonomy & NFR gates (v8.x).
 
-# **8. Accessibility & Performance Budgets**
+## Accessibility & Performance Budgets
 
 ## **8.1 Accessibility Standards**
 
@@ -1558,7 +1565,7 @@ Performance targets are strict and **enforced via CI/CD gates**. Builds failing 
 - Quarterly **A11y/Perf review reports** are auto-exported for compliance officers.
 - Accessibility acceptance tests are linked to UC flows (see Section 10).
 
-# **9. Migration & Rollback Plan**
+## Migration & Rollback Plan
 
 ## **9.1 Migration Strategy**
 
@@ -1644,7 +1651,7 @@ Rollback is **last resort** (triggered by Severity 1 issues).
 5. **Disable Maintenance Mode** on legacy app (resume read/write).
 6. **Post-Mortem:** Root cause analysis before rescheduling migration.
 
-# **10. Acceptance Tests & Validation Rules**
+## Acceptance Tests & Validation Rules
 
 ## **10.1 Functional Acceptance Tests**
 
@@ -1718,7 +1725,7 @@ Rollback is **last resort** (triggered by Severity 1 issues).
     - Admin MFA elevation
     - Access review export
 
-# **11. Release Notes & Changelog**
+## Release Notes & Changelog
 
 ## **Version 9.1.1 — Consolidated Master (Current)**
 
