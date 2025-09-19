@@ -11,6 +11,7 @@ const projectRoot = process.env.PROJECT_ROOT || dirname(fileURLToPath(import.met
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: { host: true, port: 5000 },
   plugins: [
     react(),
     tailwindcss(),
