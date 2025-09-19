@@ -24,6 +24,10 @@ No problem! If you were just checking things out and don’t need to keep this c
 
 The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
 
+## Documentation
+
+- See [SupplySync Version 10.0.1](./SupplySync%20Version%2010.md) for full project documentation.
+
 ## 📝 Markdown Hygiene & Docs
 
 - Markdown linting is enabled via [markdownlint](https://github.com/DavidAnson/markdownlint) and [markdownlint-cli2](https://github.com/DavidAnson/markdownlint-cli2).

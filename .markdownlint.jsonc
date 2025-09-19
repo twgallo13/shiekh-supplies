@@ -1,4 +1,7 @@
 {
+    // Allow long lines in prose-heavy docs
+    "MD013": false,
+    // Allow these semantic HTML tags that appear in our docs
     "MD033": {
         "allowed_elements": [
             "aside",
@@ -7,11 +10,5 @@
             "button",
             "form"
         ]
-    },
-    "MD025": true,
-    "MD007": {
-        "indent": 2
-    },
-    "MD022": true,
-    "default": true
+    }
 }

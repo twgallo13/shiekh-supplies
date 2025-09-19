@@ -10,9 +10,8 @@
         "lint": "eslint .",
         "optimize": "vite optimize",
         "preview": "vite preview",
-        "mdlint": "markdownlint-cli2 '**/*.md'",
-        "mdlint:fix": "markdownlint-cli2 '**/*.md' --fix",
-        "mdlint:docs": "markdownlint-cli2 'docs/**/*.md'"
+        "lint:md": "markdownlint-cli2 \"**/*.md\"",
+        "fix:md": "markdownlint-cli2 --fix \"**/*.md\""
     },
     "dependencies": {
         "@github/spark": "^0.39.0",

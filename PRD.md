@@ -7,12 +7,14 @@ A centralized enterprise platform for managing non-merchandise supplies across a
 The platform is designed to achieve specific strategic business goals while delivering a high-quality user experience.
 
 ### Strategic Goals
+
 - **Operational Continuity**: Prevent supply shortages through predictive analytics and automated replenishment triggers.
 - **Lowest Landed Cost**: Utilize deterministic logic to source supplies at the best possible price.
 - **Governance & Compliance**: Ensure every action is tracked in an immutable, auditable log with clear accountability.
 - **Role-Aware Control**: Provide precise, role-based permissions to ensure users only see and act on what's relevant to them.
 
 ### Experience Qualities
+
 - **Professional**: A clean, enterprise-grade interface that builds trust and confidence.
 - **Efficient**: Streamlined workflows that minimize clicks and cognitive load for all users.
 - **Transparent**: Clear visibility into order status, approval chains, costs, and the logic behind system-generated decisions.
@@ -33,6 +35,7 @@ Access and functionality are strictly governed by the user's assigned role.
 ## 3. Essential Features & User Stories
 
 ### 3.1 Role-Based Dashboard
+
 - **User Story 1**: As a **Store Manager**, I want to see a summary of my recent orders and their current status on my dashboard so that I can quickly track my supplies.
 - **User Story 2**: As a **District Manager**, I need my dashboard to immediately show me any store requests that are pending my approval so that I can take action without delay.
 - **User Story 3**: As a **Facility Manager**, I want a high-level view of fulfillment KPIs and any escalated issues so I can manage regional logistics effectively.
@@ -40,6 +43,7 @@ Access and functionality are strictly governed by the user's assigned role.
 - **Technical Considerations**: Requires API endpoints that provide role-specific data (e.g., `GET /api/v1/dashboard`).
 
 ### 3.2 Order Management Workflow
+
 - **User Story 1**: As a **Store Manager**, I need to create an ad-hoc order for a restricted item (e.g., a POS terminal) and provide a justification, so that it can be routed for approval.
 - **User Story 2**: As a **District Manager**, I must be able to approve or reject a store's request for a restricted item, providing a mandatory reason if I reject it.
 - **User Story 3**: As a **Store Manager**, I must be able to confirm receipt of an order via a barcode scan and report any variances (damaged, short-shipped) with photo evidence.
@@ -47,12 +51,14 @@ Access and functionality are strictly governed by the user's assigned role.
 - **Technical Considerations**: Involves `POST /api/v1/orders`, `POST /api/v1/orders/{id}/approve`, and `POST /api/v1/orders/{id}/variance`.
 
 ### 3.3 Storefront Catalog
+
 - **User Story 1**: As a **Store Manager**, I need to search and browse a catalog of approved supplies so I can easily find the items I need.
 - **User Story 2**: When I select a non-restricted item, I want to add it directly to my cart. When I select a restricted item, the button should change to "Request Approval" to make the workflow clear.
 - **Success Criteria**: Users can find products quickly via search and filters. The purchasing controls (Add to Cart vs. Request Approval) are enforced at the UI level based on the product's `isRestricted` flag.
 - **Technical Considerations**: Requires `GET /api/v1/products` with search and filter parameters.
 
 ### 3.4 Audit & Analytics Dashboard
+
 - **User Story 1**: As an **Admin**, I need to search and filter the complete audit trail by user, date, or action type (e.g., "FM Override") to support compliance reviews.
 - **User Story 2**: As a **Cost Analyst**, I want to view dashboards on cost variance and vendor SLA compliance, and be able to export this data as a CSV for reporting.
 - **Success Criteria**: Provides complete, searchable visibility into all system activity, with data export capabilities for compliance and financial analysis.
@@ -63,6 +69,7 @@ Access and functionality are strictly governed by the user's assigned role.
 These are simplified models for UI development. The full, authoritative schemas are in the master technical specification.
 
 ### Product
+
 ```json
 {
   "productId": "UUID",
